@@ -1,0 +1,3 @@
+phpcs/vendor
+phpstan/vendor
+phpunit/vendor
