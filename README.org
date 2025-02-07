@@ -1,0 +1,14 @@
+#+TITLE: Readme
+#+AUTHOR: Your Name
+
+* Introduction
+
+This is a PHP package. You can install it using [[https://getcomposer.org][Composer]] like so:
+
+#+BEGIN_SOURCE shell
+composer require themosis/package
+#+END_SOURCE
+
+* Usage
+
+Usage instructions...
