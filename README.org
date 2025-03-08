@@ -1,13 +1,14 @@
-#+TITLE: Readme
-#+AUTHOR: Your Name
+#+title: Readme
+#+author: Full Name
+#+email: email@domain.tld
 
 * Introduction
 
 This is a PHP package. You can install it using [[https://getcomposer.org][Composer]] like so:
 
-#+BEGIN_SOURCE shell
+#+begin_src sh
 composer require themosis/package
-#+END_SOURCE
+#+end_src
 
 * Usage
 
