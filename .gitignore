@@ -3,6 +3,7 @@
 .phpunit.cache
 .php-cs-fixer.cache
 composer.lock
+composer.phar
 /coverage
 /vendor
 /node_modules

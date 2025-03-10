@@ -25,6 +25,9 @@
         "test": "XDEBUG_MODE=coverage tools/phpunit/vendor/bin/phpunit --coverage-html coverage/html",
         "fix": "tools/phpcs/vendor/bin/phpcbf",
         "sniff": "tools/phpcs/vendor/bin/phpcs",
-        "analyze": "tools/phpstan/vendor/bin/phpstan analyze"
+        "analyze": "tools/phpstan/vendor/bin/phpstan analyze",
+	"post-autoload-dump": [
+	    "@php -f scripts/configure.php"
+	]
     }
 }
