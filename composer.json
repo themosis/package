@@ -1,11 +1,11 @@
 {
-    "name": "themosis/package",
-    "description": "Themosis PHP package skeleton.",
+    "name": "vendor_name/package_name",
+    "description": "description",
     "type": "library",
     "license": "GPL-3.0-or-later",
     "authors": [
 	{
-	    "name": "Your Name",
+	    "name": "author_name",
 	    "email": "email@domain.tld"
 	}
     ],
