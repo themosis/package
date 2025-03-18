@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Themosis;
 
+use Closure;
+
 function rootPath(): string
 {
     return \dirname(__DIR__);
@@ -23,18 +25,68 @@ function json(string $path): \stdClass
     );
 }
 
-function prompt(string $message, ?string &$value): void
+function prompt(string $message, string $validation): string
 {
-    fwrite(STDOUT, $message."\n");
-    $value = rtrim(fgets(STDIN));
+    fwrite(STDOUT, $message . "\n");
+
+    $eval = function ($callback) use ($message, $validation) {
+        return $callback($message, $validation);
+    };
+
+    return call_user_func($validation, rtrim(fgets(STDIN)), $eval);
 }
 
 function writeLine(string $message): void
 {
-    fwrite(STDOUT, $message."\n");
+    fwrite(STDOUT, $message . "\n");
 }
 
-$name = null;
-prompt("What's your name?", $name);
-writeLine("Welcome, {$name}!");
+function validateVendor(string $vendor, Closure $eval): string
+{
+    if (empty($vendor)) {
+        return $eval(function ($message, $validation) {
+            writeLine("Vendor name cannot be empty.");
+            return prompt($message, $validation);
+        });
+    }
 
+    if (strpos($vendor, '/') !== false) {
+        return $eval(function ($message, $validation) {
+            writeLine("Vendor name cannot contain '/' characters.");
+            return prompt($message, $validation);
+        });
+    }
+
+    return strtolower($vendor);
+}
+
+function validatePackage(string $package, Closure $eval): string
+{
+    if (empty($package)) {
+        return $eval(function ($message, $validation) {
+            writeLine("Package name cannot be empty.");
+            return prompt($message, $validation);
+        });
+    }
+
+    return strtolower($package);
+}
+
+function validateDescription(string $description, Closure $eval): string
+{
+    if (empty($description)) {
+        return $eval(function ($message, $validation) {
+            writeLine("Description cannot be empty.");
+            return prompt($message, $validation);
+        });
+    }
+
+    return $description;
+}
+
+/*----------------------------------------------------------------------------*/
+$vendor = prompt("Please insert vendor name:", 'Themosis\validateVendor');
+$package = prompt("Please insert package name:", 'Themosis\validatePackage');
+$description = prompt("Please insert a description:", 'Themosis\validateDescription');
+
+writeLine("You inserted: {$vendor}/{$package}: {$description}");
