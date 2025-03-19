@@ -36,6 +36,34 @@ function prompt(string $message, string $validation): string
     return call_user_func($validation, rtrim(fgets(STDIN)), $eval);
 }
 
+function collectablePrompt(string $message, string $addMessage,  Closure ...$prompts): array
+{
+    $items = [];
+
+    $add = function (Closure $next, &$items) use ($addMessage, $prompts) {
+        $item = [];
+
+        array_map(function (Closure $prompt) use (&$item) {
+            [$key, $value] = $prompt();
+
+            $item[$key] = $value;
+        }, $prompts);
+
+        $items[] = $item;
+
+        $response = prompt($addMessage , 'Themosis\validateYesOrNo');
+
+        if ($response === 'y') {
+            $next($next, $items);
+        }
+    };
+
+    writeLine($message);
+    $add($add, $items);
+
+    return $items;
+}
+
 function writeLine(string $message): void
 {
     fwrite(STDOUT, $message . "\n");
@@ -57,7 +85,7 @@ function validateVendor(string $vendor, Closure $eval): string
         });
     }
 
-    return strtolower($vendor);
+    return \strtolower($vendor);
 }
 
 function validatePackage(string $package, Closure $eval): string
@@ -69,7 +97,7 @@ function validatePackage(string $package, Closure $eval): string
         });
     }
 
-    return strtolower($package);
+    return \strtolower($package);
 }
 
 function validateDescription(string $description, Closure $eval): string
@@ -84,9 +112,36 @@ function validateDescription(string $description, Closure $eval): string
     return $description;
 }
 
+function validateYesOrNo(string $confirm): string
+{
+    if (in_array($confirm, ['y', 'Y', 'Yes', 'yes', 'YES'])) {
+        return 'y';
+    }
+
+    return 'n';
+}
+
+function validateText(string $text): string
+{
+    return $text;
+}
+
 /*----------------------------------------------------------------------------*/
 $vendor = prompt("Please insert vendor name:", 'Themosis\validateVendor');
 $package = prompt("Please insert package name:", 'Themosis\validatePackage');
 $description = prompt("Please insert a description:", 'Themosis\validateDescription');
+$authors = collectablePrompt(
+    "Please add an author:",
+    "Add another author?(y/n)",
+    function () {
+        $name = prompt("Author name:", 'Themosis\validateText');
+        return ['name', $name];
+    },
+    function () {
+        $email = prompt("Author email:", 'Themosis\validateText');
+        return ['email', $email];
+    }
+);
 
 writeLine("You inserted: {$vendor}/{$package}: {$description}");
+var_dump($authors);
