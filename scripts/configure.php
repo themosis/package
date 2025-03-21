@@ -28,7 +28,6 @@ function json(string $path): \stdClass
 function prompt(string $message, string $validation): string
 {
     fwrite(STDOUT, $message . "\n");
-
     $eval = function ($callback) use ($message, $validation) {
         return $callback($message, $validation);
     };
@@ -36,7 +35,7 @@ function prompt(string $message, string $validation): string
     return call_user_func($validation, rtrim(fgets(STDIN)), $eval);
 }
 
-function collectablePrompt(string $message, string $addMessage,  Closure ...$prompts): array
+function iterablePrompt(string $message, string $addMessage,  Closure ...$prompts): array
 {
     $items = [];
 
@@ -130,7 +129,7 @@ function validateText(string $text): string
 $vendor = prompt("Please insert vendor name:", 'Themosis\validateVendor');
 $package = prompt("Please insert package name:", 'Themosis\validatePackage');
 $description = prompt("Please insert a description:", 'Themosis\validateDescription');
-$authors = collectablePrompt(
+$authors = iterablePrompt(
     "Please add an author:",
     "Add another author?(y/n)",
     function () {
