@@ -5,6 +5,11 @@ declare(strict_types=1);
 namespace Themosis;
 
 use Closure;
+use Themosis\Cli\PhpStdInput;
+use Themosis\Cli\PhpStdOutput;
+use Themosis\Cli\Prompt;
+
+require dirname(__DIR__).'/cli/autoload.php';
 
 function rootPath(): string
 {
@@ -126,6 +131,16 @@ function validateText(string $text): string
 }
 
 /*----------------------------------------------------------------------------*/
+$prompt = new Prompt(
+    output: new PhpStdOutput(),
+    input: new PhpStdInput(),
+);
+
+$test = $prompt("Gimme your name:\n");
+var_dump($test);
+
+
+
 $vendor = prompt("Please insert vendor name:", 'Themosis\validateVendor');
 $package = prompt("Please insert package name:", 'Themosis\validatePackage');
 $description = prompt("Please insert a description:", 'Themosis\validateDescription');

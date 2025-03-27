@@ -5,40 +5,48 @@ declare(strict_types=1);
 namespace Themosis\Cli\Tests;
 
 use PHPUnit\Framework\Attributes\Test;
+use Themosis\Cli\Input;
 use Themosis\Cli\Output;
+use Themosis\Cli\Prompt;
 
 final class PromptTest extends TestCase
 {
     #[Test]
-    public function itCanPromptUser()
+    public function itCanPromptUser_andExpectStringResult()
     {
         $prompt = new Prompt(
-            output: $output = new LocalFileOutput(
-                filepath: __DIR__.'/fixtures/hello.txt',
+            output: $output = new LocalInMemoryOutput(),
+            input: $input = new LocalInMemoryInput(
+                input: 'Bond James',
             ),
-            input: null,
         );
 
         $message = "Please insert your name:\n";
-        $prompt($message);
+        $result = $prompt($message);
 
-        $this->assertSame($message, $output->read());
+        $this->assertSame($message, $output->content);
+        $this->assertSame($result, $input->read());
     }
 }
 
-final class LocalFileOutput implements Output
+final class LocalInMemoryOutput implements Output
 {
-    public function __construct(
-        private string $filepath,
-    ) {}
+    public string $content = '';
 
     public function write(string $content): void
     {
-        file_put_contents($this->filepath, $content);
+        $this->content = $content;
     }
+}
+
+final class LocalInMemoryInput implements Input
+{
+    public function __construct(
+        private string $input,
+    ) {}
 
     public function read(): string
     {
-        return file_get_contents($this->filepath);
+        return $this->input;
     }
 }
