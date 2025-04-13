@@ -12,6 +12,23 @@ use Themosis\Cli\Prompt;
 final class PromptTest extends TestCase
 {
     #[Test]
+    public function itCanPromptUser_andExpectEmptyString()
+    {
+        $prompt = new Prompt(
+            output: $output = new LocalInMemoryOutput(),
+            input: new LocalInMemoryInput(
+                input: '',
+            ),
+        );
+
+        $message = "Please insert nothing:";
+        $result = $prompt($message);
+
+        $this->assertSame($message, $output->content);
+        $this->assertEmpty($result);
+    }
+
+    #[Test]
     public function itCanPromptUser_andExpectStringResult()
     {
         $prompt = new Prompt(
