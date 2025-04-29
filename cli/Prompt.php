@@ -11,10 +11,15 @@ final class Prompt
         private Input $input,
     ) {}
 
-    public function __invoke(string $content): string
+    public function call(): string
     {
-        $this->output->write($content);
+        $this->output->write();
 
         return $this->input->read();
+    }
+
+    public function __invoke(): string
+    {
+        return $this->call();
     }
 }

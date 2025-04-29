@@ -6,8 +6,12 @@ namespace Themosis\Cli;
 
 final class PhpStdOutput implements Output
 {
-    public function write(string $content): void
+    public function __construct(
+        private string $content,
+    ) {}
+
+    public function write(): void
     {
-        fwrite(STDOUT, $content);
+        fwrite(STDOUT, $this->content);
     }
 }

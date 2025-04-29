@@ -15,16 +15,16 @@ final class PromptTest extends TestCase
     public function itCanPromptUser_andExpectEmptyString()
     {
         $prompt = new Prompt(
-            output: $output = new LocalInMemoryOutput(),
+            output: new LocalInMemoryOutput(
+                content: "Please insert nothing:",
+            ),
             input: new LocalInMemoryInput(
                 input: '',
             ),
         );
 
-        $message = "Please insert nothing:";
-        $result = $prompt($message);
+        $result = $prompt();
 
-        $this->assertSame($message, $output->content);
         $this->assertEmpty($result);
     }
 
@@ -32,28 +32,28 @@ final class PromptTest extends TestCase
     public function itCanPromptUser_andExpectStringResult()
     {
         $prompt = new Prompt(
-            output: $output = new LocalInMemoryOutput(),
+            output: new LocalInMemoryOutput(
+                content: "Please insert your name:\n",
+            ),
             input: $input = new LocalInMemoryInput(
                 input: 'Bond James',
             ),
         );
 
-        $message = "Please insert your name:\n";
-        $result = $prompt($message);
+        $result = $prompt();
 
-        $this->assertSame($message, $output->content);
         $this->assertSame($result, $input->read());
     }
 }
 
 final class LocalInMemoryOutput implements Output
 {
-    public string $content = '';
+    public function __construct(
+        public string $content,
+    ) {}
 
-    public function write(string $content): void
-    {
-        $this->content = $content;
-    }
+    public function write(): void
+    {}
 }
 
 final class LocalInMemoryInput implements Input
@@ -61,6 +61,8 @@ final class LocalInMemoryInput implements Input
     public function __construct(
         private string $input,
     ) {}
+
+    public function validate(): void { }
 
     public function read(): string
     {
