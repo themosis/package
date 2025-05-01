@@ -19,7 +19,7 @@ final class PromptTest extends TestCase
                 content: "Please insert nothing:",
             ),
             input: new LocalInMemoryInput(
-                input: '',
+                text: '',
             ),
         );
 
@@ -36,7 +36,7 @@ final class PromptTest extends TestCase
                 content: "Please insert your name:\n",
             ),
             input: $input = new LocalInMemoryInput(
-                input: 'Bond James',
+                text: 'Bond James',
             ),
         );
 
@@ -59,13 +59,13 @@ final class LocalInMemoryOutput implements Output
 final class LocalInMemoryInput implements Input
 {
     public function __construct(
-        private string $input,
+        private string $text,
     ) {}
 
     public function validate(): void { }
 
     public function read(): string
     {
-        return $this->input;
+        return $this->text;
     }
 }
