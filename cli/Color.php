@@ -6,5 +6,5 @@ namespace Themosis\Cli;
 
 interface Color
 {
-    public function value(): string;
+    public function value(Layer $layer): string;
 }

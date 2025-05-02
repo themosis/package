@@ -4,6 +4,8 @@ declare(strict_types=1);
 
 namespace Themosis\Cli\Tests;
 
+use Themosis\Cli\Text;
+
 final class TextTest extends TestCase
 {
     public function buildText()

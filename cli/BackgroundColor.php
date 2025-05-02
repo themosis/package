@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Themosis\Cli;
 
-final class ForegroundColor implements Style
+final class BackgroundColor implements Style
 {
     public function __construct(
         private Color $color,
@@ -12,6 +12,6 @@ final class ForegroundColor implements Style
 
     public function definition(): string
     {
-        return $this->color->value(Layer::Foreground);
+        return $this->color->value(Layer::Background);
     }
 }

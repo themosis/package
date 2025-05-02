@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-use Themosis\Cli\Node;
+namespace Themosis\Cli;
 
 final class Text implements Node
 {
