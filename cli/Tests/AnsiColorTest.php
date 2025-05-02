@@ -34,7 +34,8 @@ final class AnsiColorTest extends TestCase
         ];
     }
 
-    #[Test(), DataProvider('colors')]
+    #[Test]
+    #[DataProvider('colors')]
     public function itRenders16BitsAnsiColors(Color $color, string $expected): void
     {
         $this->assertSame($expected, $color->value());
