@@ -8,6 +8,7 @@ use PHPUnit\Framework\Attributes\Test;
 use Themosis\Cli\AnsiColor;
 use Themosis\Cli\BackgroundColor;
 use Themosis\Cli\ForegroundColor;
+use Themosis\Cli\LineFeed;
 use Themosis\Cli\Reset;
 use Themosis\Cli\Sequence;
 use Themosis\Cli\Text;
@@ -40,8 +41,9 @@ final class SequenceTest extends TestCase
             ->add(new BackgroundColor(AnsiColor::red()))
             ->add(new ForegroundColor(AnsiColor::yellow()))
             ->add(new Text($text = "This text has a red background and a yellow foreground"))
+            ->add(new LineFeed())
             ->add(new Reset());
 
-        $this->assertSame("\u{001b}[41m\u{001b}[33m{$text}\u{001b}[0m", $sequence->content());
+        $this->assertSame("\u{001b}[41m\u{001b}[33m{$text}\u{000a}\u{001b}[0m", $sequence->content());
     }
 }
