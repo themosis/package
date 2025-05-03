@@ -4,69 +4,121 @@ declare(strict_types=1);
 
 namespace Themosis\Cli\Tests;
 
-use PHPUnit\Framework\Attributes\DataProvider;
 use PHPUnit\Framework\Attributes\Test;
 use Themosis\Cli\AnsiColor;
-use Themosis\Cli\Color;
 use Themosis\Cli\Layer;
 
 final class AnsiColorTest extends TestCase
 {
-    public static function foregroundColors(): array
+    #[Test]
+    public function itRenders_blackColors(): void
     {
-        return [
-            [AnsiColor::black(), "\u001b[30m"],
-            [AnsiColor::brightBlack(), "\u001b[30;1m"],
-            [AnsiColor::red(), "\u001b[31m"],
-            [AnsiColor::brightRed(), "\u001b[31;1m"],
-            [AnsiColor::green(), "\u001b[32m"],
-            [AnsiColor::brightGreen(), "\u001b[32;1m"],
-            [AnsiColor::yellow(), "\u001b[33m"],
-            [AnsiColor::brightYellow(), "\u001b[33;1m"],
-            [AnsiColor::blue(), "\u001b[34m"],
-            [AnsiColor::brightBlue(), "\u001b[34;1m"],
-            [AnsiColor::magenta(), "\u001b[35m"],
-            [AnsiColor::brightMagenta(), "\u001b[35;1m"],
-            [AnsiColor::cyan(), "\u001b[36m"],
-            [AnsiColor::brightCyan(), "\u001b[36;1m"],
-            [AnsiColor::white(), "\u001b[37m"],
-            [AnsiColor::brightWhite(), "\u001b[37;1m"],
-        ];
-    }
+        $black = AnsiColor::black();
 
-    public static function backgroundColors(): array
-    {
-        return [
-            [AnsiColor::black(), "\u001b[40m"],
-            [AnsiColor::brightBlack(), "\u001b[40;1m"],
-            [AnsiColor::red(), "\u001b[41m"],
-            [AnsiColor::brightRed(), "\u001b[41;1m"],
-            [AnsiColor::green(), "\u001b[42m"],
-            [AnsiColor::brightGreen(), "\u001b[42;1m"],
-            [AnsiColor::yellow(), "\u001b[43m"],
-            [AnsiColor::brightYellow(), "\u001b[43;1m"],
-            [AnsiColor::blue(), "\u001b[44m"],
-            [AnsiColor::brightBlue(), "\u001b[44;1m"],
-            [AnsiColor::magenta(), "\u001b[45m"],
-            [AnsiColor::brightMagenta(), "\u001b[45;1m"],
-            [AnsiColor::cyan(), "\u001b[46m"],
-            [AnsiColor::brightCyan(), "\u001b[46;1m"],
-            [AnsiColor::white(), "\u001b[47m"],
-            [AnsiColor::brightWhite(), "\u001b[47;1m"],
-        ];
+        $this->assertSame("\u{001b}[30m", $black->value(Layer::Foreground));
+        $this->assertSame("\u{001b}[40m", $black->value(Layer::Background));
+
+        $brightBlack = AnsiColor::brightBlack();
+
+        $this->assertSame("\u{001b}[30;1m", $brightBlack->value(Layer::Foreground));
+        $this->assertSame("\u{001b}[40;1m", $brightBlack->value(Layer::Background));
     }
 
     #[Test]
-    #[DataProvider('foregroundColors')]
-    public function itRenders16BitsForegroundAnsiColors(Color $color, string $expected): void
+    public function itRenders_redColors(): void
     {
-        $this->assertSame($expected, $color->value(Layer::Foreground));
+        $red = AnsiColor::red();
+
+        $this->assertSame("\u{001b}[31m", $red->value(Layer::Foreground));
+        $this->assertSame("\u{001b}[41m", $red->value(Layer::Background));
+
+        $brightRed = AnsiColor::brightRed();
+
+        $this->assertSame("\u{001b}[31;1m", $brightRed->value(Layer::Foreground));
+        $this->assertSame("\u{001b}[41;1m", $brightRed->value(Layer::Background));
     }
 
     #[Test]
-    #[DataProvider('backgroundColors')]
-    public function itRenders16BitsBackgroundAnsiColors(Color $color, string $expected): void
+    public function itRenders_greenColors(): void
     {
-        $this->assertSame($expected, $color->value(Layer::Background));
+        $green = AnsiColor::green();
+
+        $this->assertSame("\u{001b}[32m", $green->value(Layer::Foreground));
+        $this->assertSame("\u{001b}[42m", $green->value(Layer::Background));
+
+        $brightGreen = AnsiColor::brightGreen();
+
+        $this->assertSame("\u{001b}[32;1m", $brightGreen->value(Layer::Foreground));
+        $this->assertSame("\u{001b}[42;1m", $brightGreen->value(Layer::Background));
+    }
+
+    #[Test]
+    public function itRenders_yellowColors(): void
+    {
+        $yellow = AnsiColor::yellow();
+
+        $this->assertSame("\u{001b}[33m", $yellow->value(Layer::Foreground));
+        $this->assertSame("\u{001b}[43m", $yellow->value(Layer::Background));
+
+        $brightYellow = AnsiColor::brightYellow();
+
+        $this->assertSame("\u{001b}[33;1m", $brightYellow->value(Layer::Foreground));
+        $this->assertSame("\u{001b}[43;1m", $brightYellow->value(Layer::Background));
+    }
+
+    #[Test]
+    public function itRenders_blueColors(): void
+    {
+        $blue = AnsiColor::blue();
+
+        $this->assertSame("\u{001b}[34m", $blue->value(Layer::Foreground));
+        $this->assertSame("\u{001b}[44m", $blue->value(Layer::Background));
+
+        $brightBlue = AnsiColor::brightBlue();
+
+        $this->assertSame("\u{001b}[34;1m", $brightBlue->value(Layer::Foreground));
+        $this->assertSame("\u{001b}[44;1m", $brightBlue->value(Layer::Background));
+    }
+
+    #[Test]
+    public function itRenders_magentaColors(): void
+    {
+        $magenta = AnsiColor::magenta();
+
+        $this->assertSame("\u{001b}[35m", $magenta->value(Layer::Foreground));
+        $this->assertSame("\u{001b}[45m", $magenta->value(Layer::Background));
+
+        $brightMagenta = AnsiColor::brightMagenta();
+
+        $this->assertSame("\u{001b}[35;1m", $brightMagenta->value(Layer::Foreground));
+        $this->assertSame("\u{001b}[45;1m", $brightMagenta->value(Layer::Background));
+    }
+
+    #[Test]
+    public function itRenders_cyanColors(): void
+    {
+        $cyan = AnsiColor::cyan();
+
+        $this->assertSame("\u{001b}[36m", $cyan->value(Layer::Foreground));
+        $this->assertSame("\u{001b}[46m", $cyan->value(Layer::Background));
+
+        $brightCyan = AnsiColor::brightCyan();
+
+        $this->assertSame("\u{001b}[36;1m", $brightCyan->value(Layer::Foreground));
+        $this->assertSame("\u{001b}[46;1m", $brightCyan->value(Layer::Background));
+    }
+
+    #[Test]
+    public function itRenders_whiteColors(): void
+    {
+        $white = AnsiColor::white();
+
+        $this->assertSame("\u{001b}[37m", $white->value(Layer::Foreground));
+        $this->assertSame("\u{001b}[47m", $white->value(Layer::Background));
+
+        $brightWhite = AnsiColor::brightWhite();
+
+        $this->assertSame("\u{001b}[37;1m", $brightWhite->value(Layer::Foreground));
+        $this->assertSame("\u{001b}[47;1m", $brightWhite->value(Layer::Background));
     }
 }

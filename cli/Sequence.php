@@ -8,6 +8,7 @@ use Stringable;
 
 final class Sequence implements Stringable, Node
 {
+    /** @var Node[] */
     private array $nodes = [];
 
     public function add(Node $node): static
@@ -19,11 +20,13 @@ final class Sequence implements Stringable, Node
 
     public function content(): string
     {
-        return (string) $this;
+        return implode("", array_map(function (Node $node) {
+            return $node->content();
+        }, $this->nodes));
     }
 
     public function __toString(): string
     {
-        return implode("", $this->nodes);
+        return $this->content();
     }
 }

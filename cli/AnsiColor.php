@@ -4,8 +4,6 @@ declare(strict_types=1);
 
 namespace Themosis\Cli;
 
-use RuntimeException;
-
 final class AnsiColor implements Color
 {
     private function __construct(
@@ -135,16 +133,21 @@ final class AnsiColor implements Color
 
     public function value(Layer $layer): string
     {
-        $code = match (true) {
-            $layer === Layer::Foreground => $this->code,
-            $layer === Layer::Background => $this->code + 10,
-            default => throw new RuntimeException("Unsupported layer color value.")
-        };
+        $code = $layer === Layer::Foreground
+            ? $this->code
+            : $this->code + 10;
 
         $codeAsString = $this->isBright
             ? "{$code};1"
             : $code;
 
-        return "\u001b[{$codeAsString}m";
+        $unicodeEscape = "\u{001b}";
+
+        /**
+         * This is called a CSI (Control Sequence Introducer).
+         * It starts with an escape sequence followed by a left square bracket,
+         * the sequence color code and ending with the single "m" character.
+         */
+        return "{$unicodeEscape}[{$codeAsString}m";
     }
 }

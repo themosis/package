@@ -8,6 +8,6 @@ final class Reset implements Node
 {
     public function content(): string
     {
-        return "\u001b[0m";
+        return "\u{001b}[0m";
     }
 }
