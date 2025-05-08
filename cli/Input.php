@@ -2,9 +2,7 @@
 
 namespace Themosis\Cli;
 
-use Themosis\Cli\Validation\Validator;
-
-interface Input extends Validator
+interface Input
 {
     public function read(): string;
 }

@@ -6,5 +6,5 @@ namespace Themosis\Cli;
 
 interface Output
 {
-    public function write(): void;
+    public function write(string $content): void;
 }

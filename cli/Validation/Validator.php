@@ -6,5 +6,5 @@ namespace Themosis\Cli\Validation;
 
 interface Validator
 {
-    public function validate(): void;
+    public function validate(string $value): void;
 }
