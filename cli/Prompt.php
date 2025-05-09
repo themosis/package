@@ -9,13 +9,16 @@ use Themosis\Cli\Validation\Validator;
 
 final class Prompt
 {
+    /** @var string[] $values */
+    private array $values = [];
+
     public function __construct(
         private Output $output,
         private Input $input,
         private Validator $validator,
     ) {}
 
-    public function call(string $question): string
+    public function call(string $question, bool $iterate = false): string|array
     {
         $this->output->write($question);
         $result = $this->input->read();
@@ -28,11 +31,22 @@ final class Prompt
             return $this->call($question);
         }
 
-        return $result;
+        $this->values[] = $result;
+
+        if ($iterate) {
+            $this->output->write("More? (y/n)\n");
+            $response = $this->input->read();
+
+            if (in_array(strtolower($response), ['y', 'yes'])) {
+                return $this->call($question, $iterate);
+            }
+        }
+
+        return $iterate ? $this->values : array_shift($this->values);
     }
 
-    public function __invoke(string $question): string
+    public function __invoke(string $question, bool $iterate = false): string|array
     {
-        return $this->call($question);
+        return $this->call($question, $iterate);
     }
 }
