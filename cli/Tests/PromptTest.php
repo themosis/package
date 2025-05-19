@@ -8,6 +8,9 @@ use PHPUnit\Framework\Attributes\Test;
 use Themosis\Cli\Input;
 use Themosis\Cli\Output;
 use Themosis\Cli\Prompt;
+use Themosis\Cli\Sequence;
+use Themosis\Cli\Text;
+use Themosis\Cli\Validable;
 use Themosis\Cli\Validation\CallbackValidator;
 use Themosis\Cli\Validation\ValidationException;
 
@@ -17,32 +20,34 @@ final class PromptTest extends TestCase
     public function itCanPromptUser_andExpectEmptyString()
     {
         $prompt = new Prompt(
-            output: new LocalInMemoryOutput(),
+            message: (new Sequence())->add($text = new Text("Please insert nothing:")),
+            output: $output = new LocalInMemoryOutput(),
             input: new LocalInMemoryInput(
                 text: '',
             ),
-            validator: new CallbackValidator(function () {}),
         );
 
-        $result = $prompt("Please insert nothing:");
+        $result = $prompt();
 
         $this->assertEmpty($result);
+        $this->assertSame($text->content(), $output->output);
     }
 
     #[Test]
     public function itCanPromptUser_andExpectStringResult()
     {
         $prompt = new Prompt(
-            output: new LocalInMemoryOutput(),
+            message: (new Sequence())->add($text = new Text("Please insert your name:\n")),
+            output: $output = new LocalInMemoryOutput(),
             input: $input = new LocalInMemoryInput(
                 text: 'Bond James',
             ),
-            validator: new CallbackValidator(function () {})
         );
 
-        $result = $prompt("Please insert your name:\n");
+        $result = $prompt();
 
         $this->assertSame($result, $input->read());
+        $this->assertSame($text->content(), $output->output);
     }
 
     #[Test]
@@ -50,29 +55,32 @@ final class PromptTest extends TestCase
     {
         $iteration = 0;
 
-        $prompt = new Prompt(
-            output: $output = new LocalInMemoryOutput(),
-            input: new LocalInMemoryInput(
-                text: implode(',', ["", "Joe"]),
+        $output = new LocalInMemoryOutput();
+        $validator = new CallbackValidator(function (string $value) use (&$iteration) {
+            $texts = explode(',', $value);
+
+            if (empty($texts[$iteration])) {
+                $iteration++;
+                throw new ValidationException("Invalid name, try again!\n");
+            }
+        });
+
+        $prompt = new Validable(
+            new Prompt(
+                message: (new Sequence())->add(new Text("Please insert your name:\n")),
+                output: $output,
+                input: new LocalInMemoryInput(
+                    text: implode(',', ["", "Julien"]),
+                ),
             ),
-            validator: new CallbackValidator(function ($value) use (&$iteration) {
-                $texts = explode(',', $value);
-
-                if (empty($texts[$iteration])) {
-                    $iteration++;
-                    throw new ValidationException("Please insert a valid name.\n");
-                }
-            })
+            $validator,
+            $output
         );
 
-        $result = $prompt("Insert your name:\n");
+        $result = $prompt();
 
-        $this->assertSame(
-            "Insert your name:\nPlease insert a valid name.\nInsert your name:\n",
-            $output->output,
-        );
-
-        $this->assertSame('Joe', explode(',', $result)[1]);
+        $this->assertSame("Please insert your name:\nInvalid name, try again!\nPlease insert your name:\n", $output->output);
+        $this->assertSame('Julien', explode(',', $result)[$iteration]);
     }
 }
 

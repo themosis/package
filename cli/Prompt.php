@@ -4,49 +4,31 @@ declare(strict_types=1);
 
 namespace Themosis\Cli;
 
-use Themosis\Cli\Validation\ValidationException;
-use Themosis\Cli\Validation\Validator;
-
-final class Prompt
+final class Prompt implements Element
 {
-    /** @var string[] $values */
-    private array $values = [];
+    private string $value = '';
 
     public function __construct(
+        private Sequence $message,
         private Output $output,
         private Input $input,
-        private Validator $validator,
     ) {}
 
-    public function call(string $question, bool $iterate = false): string|array
+    public function draw(): void
     {
-        $this->output->write($question);
-        $result = $this->input->read();
-
-        try {
-            $this->validator->validate($result);
-        } catch (ValidationException $exception) {
-            $this->output->write($exception->getMessage());
-
-            return $this->call($question);
-        }
-
-        $this->values[] = $result;
-
-        if ($iterate) {
-            $this->output->write("More? (y/n)\n");
-            $response = $this->input->read();
-
-            if (in_array(strtolower($response), ['y', 'yes'])) {
-                return $this->call($question, $iterate);
-            }
-        }
-
-        return $iterate ? $this->values : array_shift($this->values);
+        $this->output->write($this->message->content());
+        $this->value = $this->input->read();
     }
 
-    public function __invoke(string $question, bool $iterate = false): string|array
+    public function value(): string
     {
-        return $this->call($question, $iterate);
+        return $this->value;
+    }
+
+    public function __invoke(): string
+    {
+        $this->draw();
+
+        return $this->value();
     }
 }

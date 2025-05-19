@@ -13,7 +13,7 @@ final class CallbackValidator implements Validator
     ) {}
 
     public function validate(string $value): void
-    {
+    { 
         ($this->callback)($value);
     }
 }
