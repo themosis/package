@@ -19,68 +19,121 @@ final class PromptTest extends TestCase
     #[Test]
     public function itCanPromptUser_andExpectEmptyString()
     {
+        $input = new LocalInMemoryInput("");
+
         $prompt = new Prompt(
-            message: (new Sequence())->add($text = new Text("Please insert nothing:")),
             output: $output = new LocalInMemoryOutput(),
-            input: new LocalInMemoryInput(
-                text: '',
-            ),
+            input: $input,
         );
 
-        $result = $prompt();
+        $result = $prompt
+            ->render($sequence = (new Sequence())->add(new Text("Please insert nothing:")))
+            ->value();
 
         $this->assertEmpty($result);
-        $this->assertSame($text->content(), $output->output);
+        $this->assertSame($sequence->content(), $output->output);
     }
 
     #[Test]
     public function itCanPromptUser_andExpectStringResult()
     {
-        $prompt = new Prompt(
-            message: (new Sequence())->add($text = new Text("Please insert your name:\n")),
-            output: $output = new LocalInMemoryOutput(),
-            input: $input = new LocalInMemoryInput(
-                text: 'Bond James',
-            ),
+        $input = new LocalInMemoryInput(
+            text: 'James Bond',
         );
 
-        $result = $prompt();
+        $prompt = new Prompt(
+            output: $output = new LocalInMemoryOutput(),
+            input: $input,
+        );
 
-        $this->assertSame($result, $input->read());
-        $this->assertSame($text->content(), $output->output);
+        $result = $prompt
+            ->render($sequence = (new Sequence())->add(new Text("What's your name?\n")))
+            ->value();
+
+        $this->assertSame('James Bond', $result);
+        $this->assertSame($sequence->content(), $output->output);
     }
 
     #[Test]
-    public function itCanPromptUser_andShouldRestartIfInvalidInput()
+    public function itCanPromptUser_andShouldRestartIfInvalidInput(): void
     {
         $iteration = 0;
 
         $output = new LocalInMemoryOutput();
-        $validator = new CallbackValidator(function (string $value) use (&$iteration) {
-            $texts = explode(',', $value);
+        $input = new LocalInMemoryInput(
+            text: implode(',', ["", "Julien"]),
+        );
 
-            if (empty($texts[$iteration])) {
-                $iteration++;
-                throw new ValidationException("Invalid name, try again!\n");
+        $validator = new CallbackValidator(
+            function (string $value) use (&$iteration) {
+                $texts = explode(',', $value);
+
+                if (empty($texts[$iteration])) {
+                    $iteration++;
+                    throw new ValidationException("Invalid name, try again!\n");
+                }
             }
-        });
+        );
 
         $prompt = new Validable(
             new Prompt(
-                message: (new Sequence())->add(new Text("Please insert your name:\n")),
                 output: $output,
-                input: new LocalInMemoryInput(
-                    text: implode(',', ["", "Julien"]),
-                ),
+                input: $input,
             ),
             $validator,
-            $output
         );
 
-        $result = $prompt();
+        $result = $prompt
+            ->render((new Sequence())->add(new Text("Please insert your name:\n")))
+            ->value();
 
         $this->assertSame("Please insert your name:\nInvalid name, try again!\nPlease insert your name:\n", $output->output);
         $this->assertSame('Julien', explode(',', $result)[$iteration]);
+    }
+
+    public function itCanCompose_MultiplePromptsAndValidate_EachInput(): void
+    {
+        $output = new LocalInMemoryOutput();
+        $input = new LocalInMemoryInput(
+            text: "Anything",
+        );
+
+        // $prompt = (new Composable(
+        //     new Prompt(
+        //         message: (new Sequence())->add(new Text("Enter an author:\n")),
+        //         output: $output,
+        //         input: $input,
+        //     )))
+        //     ->add(
+        //         new Validable(
+        //             new Prompt(
+        //                 message: (new Sequence())->add(new Text("Enter the author's name?:\n")),
+        //                 output: $output,
+        //                 input: $input,
+        //             ),
+        //             new CallbackValidator(function (string $name) {
+        //                 if ($name !== 'Julien') {
+        //                     throw new ValidationException("Invalid author's name.\n");
+        //                 }
+        //             }),
+        //             $output,
+        //         )
+        //     )
+        //     ->add(
+        //         new Validable(
+        //             new Prompt(
+        //                 message: (new Sequence())->add(new Text("Enter the author's email?:\n")),
+        //                 output: $output,
+        //                 input: $input,
+        //             ),
+        //             new CallbackValidator(function (string $email) {
+        //                 if (false === filter_var($email, FILTER_SANITIZE_EMAIL)) {
+        //                     throw new ValidationException("Invalid author's email.\n");
+        //                 }
+        //             }),
+        //             $output,
+        //         )
+        //     );
     }
 }
 

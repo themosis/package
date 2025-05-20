@@ -7,30 +7,29 @@ namespace Themosis\Cli;
 use Themosis\Cli\Validation\ValidationException;
 use Themosis\Cli\Validation\Validator;
 
-final class Validable extends Component
+final class Validable extends Element
 {
-    private Validator $validator;
-
-    private Output $output;
-
     public function __construct(
-        Element $element,
-        Validator $validator,
-        Output $output,
-    ) {
-        $this->element = $element;
-        $this->validator = $validator;
-        $this->output = $output;
-    }
+        private Element $element,
+        private Validator $validator,
+    ) {}
 
-    public function draw(): void
+    public function render(Sequence $sequence): static
     {
         try {
-            $this->element->draw();
-            $this->validator->validate($this->element->value());
+            $this->value = $this
+                ->element
+                ->render($sequence)
+                ->value();
+
+            $this
+                ->validator
+                ->validate($this->value);
         } catch (ValidationException $exception) {
-            $this->output->write($exception->getMessage());
-            $this->draw();
+            $this->element->output->write($exception->getMessage());
+            $this->render($sequence);
         }
+
+        return $this;
     }
 }

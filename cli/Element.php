@@ -4,9 +4,19 @@ declare(strict_types=1);
 
 namespace Themosis\Cli;
 
-interface Element
+abstract class Element
 {
-    public function draw(): void;
+    protected ?string $value = null;
 
-    public function value(): string;
+    public function __construct(
+        protected Output $output,
+        protected Input $input,
+    ){}
+
+    abstract public function render(Sequence $sequence): static;
+
+    public function value(): ?string
+    {
+        return $this->value;
+    }
 }
