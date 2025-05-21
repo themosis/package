@@ -10,10 +10,14 @@ abstract class Element
 
     public function __construct(
         protected Output $output,
-        protected Input $input,
-    ){}
+    ) {}
 
-    abstract public function render(Sequence $sequence): static;
+    abstract public function render(): static;
+
+    public function output(): Output
+    {
+        return $this->output;
+    }
 
     public function value(): ?string
     {

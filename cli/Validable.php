@@ -12,22 +12,26 @@ final class Validable extends Element
     public function __construct(
         private Element $element,
         private Validator $validator,
-    ) {}
+    ) {
+        parent::__construct(
+            output: $element->output,
+        );
+    }
 
-    public function render(Sequence $sequence): static
+    public function render(): static
     {
         try {
             $this->value = $this
                 ->element
-                ->render($sequence)
+                ->render()
                 ->value();
 
             $this
                 ->validator
                 ->validate($this->value);
         } catch (ValidationException $exception) {
-            $this->element->output->write($exception->getMessage());
-            $this->render($sequence);
+            $this->output->write($exception->getMessage());
+            $this->render();
         }
 
         return $this;

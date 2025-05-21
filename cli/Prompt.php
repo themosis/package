@@ -6,9 +6,16 @@ namespace Themosis\Cli;
 
 final class Prompt extends Element
 {
-    public function render(Sequence $sequence): static
+    public function __construct(
+        protected Element $element,
+        private Input $input,
+    ) {
+        parent::__construct($element->output());
+    }
+
+    public function render(): static
     {
-        $this->output->write($sequence->content());
+        $this->element->render();
         $this->value = $this->input->read();
 
         return $this;
