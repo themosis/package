@@ -6,7 +6,7 @@ namespace Themosis\Cli;
 
 abstract class Element
 {
-    protected ?string $value = null;
+    protected mixed $value = null;
 
     public function __construct(
         protected Output $output,
@@ -19,7 +19,7 @@ abstract class Element
         return $this->output;
     }
 
-    public function value(): ?string
+    public function value(): mixed
     {
         return $this->value;
     }

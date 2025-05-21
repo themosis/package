@@ -21,22 +21,33 @@ final class Composable extends Element
 
     public function add(string $name, Element $child): static
     {
+        if ('parent' === $name) {
+            throw new RuntimeException("Name {parent} is a reserved keyword.");
+        }
+
         if (isset($this->children[$name])) {
             throw new RuntimeException("Child element with name {$name} already declared.");
         }
 
-        $this->children[] = $child;
+        $this->children[$name] = $child;
 
         return $this;
     }
 
     public function render(): static
     {
+        $localValue = [];
+
         $this->parent->render();
 
-        foreach ($this->children as $child) {
+        $localValue['parent'] = $this->parent->value;
+
+        foreach ($this->children as $name => $child) {
             $child->render();
+            $localValue[$name] = $child->value();
         }
+
+        $this->value = $localValue;
 
         return $this;
     }

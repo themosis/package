@@ -134,7 +134,7 @@ final class PromptTest extends TestCase
             ->value();
 
         $this->assertSame("Please enter an author:\nInsert author's name:\n", $output->output);
-        $this->assertSame('name/Jean Pass', $result);
+        $this->assertSame(['parent' => null, 'name' => 'Jean Pass'], $result);
     }
 }
 

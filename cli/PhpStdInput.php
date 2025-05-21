@@ -6,7 +6,7 @@ namespace Themosis\Cli;
 
 use InvalidArgumentException;
 
-final class PhpStdInput implements ·Input
+final class PhpStdInput implements Input
 {
     public function read(): string
     {
