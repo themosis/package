@@ -35,7 +35,7 @@ $prompt = new Prompt(
     input: new PhpStdInput(),
 );
 
-$result = $prompt->render()->value();
+$result = $prompt();
 
 $output->write(
     (new Sequence())

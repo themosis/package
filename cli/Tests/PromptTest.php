@@ -31,9 +31,7 @@ final class PromptTest extends TestCase
             input: $input,
         );
 
-        $result = $prompt
-            ->render()
-            ->value();
+        $result = $prompt();
 
         $this->assertEmpty($result);
         $this->assertSame($sequence->content(), $output->output);
@@ -54,9 +52,7 @@ final class PromptTest extends TestCase
             input: $input,
         );
 
-        $result = $prompt
-            ->render()
-            ->value();
+        $result = $prompt();
 
         $this->assertSame('Emile Zolair', $result);
         $this->assertSame($sequence->content(), $output->output);
@@ -80,6 +76,8 @@ final class PromptTest extends TestCase
                     $iteration++;
                     throw new ValidationException("Invalid name, try again!\n");
                 }
+
+                return $texts[$iteration];
             }
         );
 
@@ -94,12 +92,10 @@ final class PromptTest extends TestCase
             $validator,
         );
 
-        $result = $prompt
-            ->render()
-            ->value();
+        $result = $prompt();
 
         $this->assertSame("Please insert your name:\nInvalid name, try again!\nPlease insert your name:\n", $output->output);
-        $this->assertSame('Julien', explode(',', $result)[$iteration]);
+        $this->assertSame('Julien', $result);
     }
 
     #[Test]
@@ -126,15 +122,37 @@ final class PromptTest extends TestCase
                 if (empty($value)) {
                     throw new ValidationException("Author's name is required.\n");
                 }
+
+                return $value;
             })
         ));
 
-        $result = $prompt
-            ->render()
-            ->value();
+        $iteration = 0;
 
-        $this->assertSame("Please enter an author:\nInsert author's name:\n", $output->output);
-        $this->assertSame(['parent' => null, 'name' => 'Jean Pass'], $result);
+        $prompt->add('email', new Validable(
+            element: new Prompt(
+                element: new Message(
+                    sequence: (new Sequence())->add(new Text("Insert author's email:\n")),
+                    output: $output
+                ),
+                input: new LocalInMemoryInput(implode(',', ["not-an-email", "jean@champagne.biz"])),
+            ),
+            validator: new CallbackValidator(function (string $value) use (&$iteration) {
+                $value = explode(',', $value)[$iteration];
+
+                if (false === filter_var($value, FILTER_VALIDATE_EMAIL)) {
+                    $iteration++;
+                    throw new ValidationException("Invalid email address.\n");
+                }
+
+                return $value;
+            })
+        ));
+
+        $result = $prompt();
+
+        $this->assertSame("Please enter an author:\nInsert author's name:\nInsert author's email:\nInvalid email address.\nInsert author's email:\n", $output->output);
+        $this->assertSame(['parent' => null, 'name' => 'Jean Pass', 'email' => 'jean@champagne.biz'], $result);
     }
 }
 

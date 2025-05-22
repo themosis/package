@@ -23,4 +23,11 @@ abstract class Element
     {
         return $this->value;
     }
+
+    public function __invoke(): mixed
+    {
+        $this->render();
+
+        return $this->value();
+    }
 }

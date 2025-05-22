@@ -21,14 +21,11 @@ final class Validable extends Element
     public function render(): static
     {
         try {
-            $this->value = $this
-                ->element
-                ->render()
-                ->value();
+            $this->element->render();
 
-            $this
+            $this->value = $this
                 ->validator
-                ->validate($this->value);
+                ->validate($this->element->value());
         } catch (ValidationException $exception) {
             $this->output->write($exception->getMessage());
             $this->render();
