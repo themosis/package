@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Themosis\Cli\Tests;
 
 use PHPUnit\Framework\Attributes\Test;
+use Themosis\Cli\Collection;
 use Themosis\Cli\Composable;
 use Themosis\Cli\Input;
 use Themosis\Cli\Message;
@@ -153,6 +154,133 @@ final class PromptTest extends TestCase
 
         $this->assertSame("Please enter an author:\nInsert author's name:\nInsert author's email:\nInvalid email address.\nInsert author's email:\n", $output->output);
         $this->assertSame(['parent' => null, 'name' => 'Jean Pass', 'email' => 'jean@champagne.biz'], $result);
+    }
+
+    #[Test]
+    public function itCanAskToCollectPrompts_andGetOnlyOneEntry(): void
+    {
+        $output = new LocalInMemoryOutput();
+
+        $prompt = new Collection(
+            element: new Validable(
+                element: new Prompt(
+                    element: new Message(
+                        sequence: (new Sequence())->add(new Text("Insert a name:\n")),
+                        output: $output,
+                    ),
+                    input: new LocalInMemoryInput('Lolita'),
+                ),
+                validator: new CallbackValidator(function (string $value) {
+                    return $value;
+                })
+            ),
+            prompt: new Validable(
+                element: new Prompt(
+                    element: new Message(
+                        sequence: (new Sequence())->add(new Text("Add another name?(y/n)\n")),
+                        output: $output,
+                    ),
+                    input: new LocalInMemoryInput('n'),
+                ),
+                validator: new CallbackValidator(function (string $value) {
+                    if (! in_array($value, ['y', 'n'])) {
+                        throw new ValidationException("Enter either y or n.\n");
+                    }
+
+                    return $value;
+                })
+            ),
+            predicate: function (string $value) {
+                return 'y' === $value;
+            },
+        );
+
+        $result = $prompt();
+
+        $this->assertTrue(is_array($result));
+        $this->assertSame(['Lolita'], $result);
+
+        $this->assertSame("Insert a name:\nAdd another name?(y/n)\n", $output->output);
+    }
+
+    #[Test]
+    public function itCanCollectComposableElements(): void
+    {
+        $output = new LocalInMemoryOutput();
+
+        $iteration = 0;
+
+        $prompt = new Collection(
+            element: (new Composable(
+                parent: new Message(
+                    sequence: (new Sequence())->add(new Text("Add an author:\n")),
+                    output: $output,
+                ),
+            ))
+                ->add('name', new Validable(
+                    element: new Prompt(
+                        element: new Message(
+                            sequence: (new Sequence())->add(new Text("Enter author's name:\n")),
+                            output: $output,
+                        ),
+                        input: new LocalInMemoryInput(implode(',', ["Laurent", "Joao"]))
+                    ),
+                    validator: new CallbackValidator(function (string $value) use (&$iteration) {
+                        $value = explode(',', $value)[$iteration];
+                        return $value;
+                    }),
+                ))
+                ->add('email', new Validable(
+                    element: new Prompt(
+                        element: new Message(
+                            sequence: (new Sequence())->add(new Text("Enter author's email:\n")),
+                            output: $output,
+                        ),
+                        input: new LocalInMemoryInput(implode(',', ["laurent@web.com", "joao@web.pt"]))
+                    ),
+                    validator: new CallbackValidator(function (string $value) use (&$iteration) {
+                        $value = explode(',', $value)[$iteration];
+                        return $value;
+                    }),
+                )),
+            prompt: new Validable(
+                element: new Prompt(
+                    element: new Message(
+                        sequence: (new Sequence())->add(new Text("Would you like to add an author?(y/n)\n")),
+                        output: $output,
+                    ),
+                    input: new LocalInMemoryInput(implode(',', ["y", "n"])),
+                ),
+                validator: new CallbackValidator(function (string $value) use (&$iteration) {
+                    $value = explode(',', $value)[$iteration];
+                    $iteration++;
+
+                    return $value;
+                })
+            ),
+            predicate: function (string $value) {
+                return 'y' === $value;
+            },
+        );
+
+        $result = $prompt();
+
+        $this->assertTrue(is_array($result));
+        $this->assertCount(2, $result);
+
+        $this->assertSame([
+            'parent' => null,
+            'name' => 'Laurent',
+            'email' => 'laurent@web.com',
+        ], $result[0]);
+
+        $this->assertSame([
+            'parent' => null,
+            'name' => 'Joao',
+            'email' => 'joao@web.pt',
+        ], $result[1]);
+
+        $this->assertSame("Add an author:\nEnter author's name:\nEnter author's email:\nWould you like to add an author?(y/n)\nAdd an author:\nEnter author's name:\nEnter author's email:\nWould you like to add an author?(y/n)\n", $output->output);
     }
 }
 
