@@ -4,12 +4,23 @@ declare(strict_types=1);
 
 namespace Themosis;
 
-use Closure;
+use Themosis\Cli\AnsiColor;
+use Themosis\Cli\Collection;
+use Themosis\Cli\Composable;
+use Themosis\Cli\ForegroundColor;
+use Themosis\Cli\LineFeed;
+use Themosis\Cli\Message;
 use Themosis\Cli\PhpStdInput;
 use Themosis\Cli\PhpStdOutput;
 use Themosis\Cli\Prompt;
+use Themosis\Cli\Reset;
+use Themosis\Cli\Sequence;
+use Themosis\Cli\Text;
+use Themosis\Cli\Validable;
+use Themosis\Cli\Validation\CallbackValidator;
+use Themosis\Cli\Validation\ValidationException;
 
-require dirname(__DIR__).'/cli/autoload.php';
+require dirname(__DIR__) . '/cli/autoload.php';
 
 function rootPath(): string
 {
@@ -30,132 +41,163 @@ function json(string $path): \stdClass
     );
 }
 
-function prompt(string $message, string $validation): string
+function sequenceDefault(string $text): Sequence
 {
-    fwrite(STDOUT, $message . "\n");
-    $eval = function ($callback) use ($message, $validation) {
-        return $callback($message, $validation);
-    };
-
-    return call_user_func($validation, rtrim(fgets(STDIN)), $eval);
+    return (new Sequence())
+        ->add(new ForegroundColor(AnsiColor::green()))
+        ->add(new Text($text))
+        ->add(new LineFeed())
+        ->add(new Reset());
 }
 
-function iterablePrompt(string $message, string $addMessage,  Closure ...$prompts): array
+function sequenceError(string $text): Sequence
 {
-    $items = [];
+    return (new Sequence())
+        ->add(new ForegroundColor(AnsiColor::red()))
+        ->add(new Text($text))
+        ->add(new LineFeed())
+        ->add(new Reset());
+}
 
-    $add = function (Closure $next, &$items) use ($addMessage, $prompts) {
-        $item = [];
+$output = new PhpStdOutput();
+$input = new PhpStdInput();
 
-        array_map(function (Closure $prompt) use (&$item) {
-            [$key, $value] = $prompt();
+$vendorPrompt = new Validable(
+    element: new Prompt(
+        element: new Message(
+            sequence: sequenceDefault("Please insert a vendor name:"),
+            output: $output,
+        ),
+        input: $input,
+    ),
+    validator: new CallbackValidator(function (string $value) {
+        if (empty($value)) {
+            $error = sequenceError("A vendor name is required.");
 
-            $item[$key] = $value;
-        }, $prompts);
-
-        $items[] = $item;
-
-        $response = prompt($addMessage , 'Themosis\validateYesOrNo');
-
-        if ($response === 'y') {
-            $next($next, $items);
+            throw new ValidationException((string) $error);
         }
-    };
 
-    writeLine($message);
-    $add($add, $items);
-
-    return $items;
-}
-
-function writeLine(string $message): void
-{
-    fwrite(STDOUT, $message . "\n");
-}
-
-function validateVendor(string $vendor, Closure $eval): string
-{
-    if (empty($vendor)) {
-        return $eval(function ($message, $validation) {
-            writeLine("Vendor name cannot be empty.");
-            return prompt($message, $validation);
-        });
-    }
-
-    if (strpos($vendor, '/') !== false) {
-        return $eval(function ($message, $validation) {
-            writeLine("Vendor name cannot contain '/' characters.");
-            return prompt($message, $validation);
-        });
-    }
-
-    return \strtolower($vendor);
-}
-
-function validatePackage(string $package, Closure $eval): string
-{
-    if (empty($package)) {
-        return $eval(function ($message, $validation) {
-            writeLine("Package name cannot be empty.");
-            return prompt($message, $validation);
-        });
-    }
-
-    return \strtolower($package);
-}
-
-function validateDescription(string $description, Closure $eval): string
-{
-    if (empty($description)) {
-        return $eval(function ($message, $validation) {
-            writeLine("Description cannot be empty.");
-            return prompt($message, $validation);
-        });
-    }
-
-    return $description;
-}
-
-function validateYesOrNo(string $confirm): string
-{
-    if (in_array($confirm, ['y', 'Y', 'Yes', 'yes', 'YES'])) {
-        return 'y';
-    }
-
-    return 'n';
-}
-
-function validateText(string $text): string
-{
-    return $text;
-}
-
-/*----------------------------------------------------------------------------*/
-$prompt = new Prompt(
-    output: new PhpStdOutput(),
-    input: new PhpStdInput(),
+        return strtolower($value);
+    }),
 );
 
-$test = $prompt("Gimme your name:\n");
-var_dump($test);
+$packagePrompt = new Validable(
+    element: new Prompt(
+        element: new Message(
+            sequence: sequenceDefault("Please insert a package name:"),
+            output: $output,
+        ),
+        input: $input,
+    ),
+    validator: new CallbackValidator(function (string $value) {
+        if (empty($value)) {
+            $error = sequenceError("A package name is required.");
 
+            throw new ValidationException((string) $error);
+        }
 
+        if (strpos($value, '/') !== false) {
+            $error = sequenceError("A '/' character is not allowed in a vendor name.");
 
-$vendor = prompt("Please insert vendor name:", 'Themosis\validateVendor');
-$package = prompt("Please insert package name:", 'Themosis\validatePackage');
-$description = prompt("Please insert a description:", 'Themosis\validateDescription');
-$authors = iterablePrompt(
-    "Please add an author:",
-    "Add another author?(y/n)",
-    function () {
-        $name = prompt("Author name:", 'Themosis\validateText');
-        return ['name', $name];
+            throw new ValidationException((string) $error);
+        }
+
+        return strtolower($value);
+    }),
+);
+
+$descriptionPrompt = new Validable(
+    element: new Prompt(
+        element: new Message(
+            sequence: sequenceDefault("Please insert a description:"),
+            output: $output,
+        ),
+        input: $input,
+    ),
+    validator: new CallbackValidator(function (string $value) {
+        if (empty($value)) {
+            $error = sequenceError("A description is required.");
+
+            throw new ValidationException((string) $error);
+        }
+
+        return $value;
+    }),
+);
+
+$authorsPrompt = new Collection(
+    element: (new Composable(
+        element: new Message(
+            sequence: sequenceDefault("Please insert an author:"),
+            output: $output,
+        ),
+    ))->add('name', new Validable(
+        element: new Prompt(
+            element: new Message(
+                sequence: sequenceDefault("Enter author's name:"),
+                output: $output,
+            ),
+            input: $input,
+        ),
+        validator: new CallbackValidator(function (string $name) {
+            if (empty($name)) {
+                $error = sequenceError("An author's name is required.");
+
+                throw new ValidationException((string) $error);
+            }
+
+            return $name;
+        }),
+    ))->add('email', new Validable(
+        element: new Prompt(
+            element: new Message(
+                sequence: sequenceDefault("Enter author's email:"),
+                output: $output,
+            ),
+            input: $input,
+        ),
+        validator: new CallbackValidator(function (string $email) {
+            if (empty($email)) {
+                $error = sequenceError("An author's email is required.");
+
+                throw new ValidationException((string) $error);
+            }
+
+            if (false === filter_var($email, FILTER_VALIDATE_EMAIL)) {
+                $error = sequenceError("Invalid email address.");
+
+                throw new ValidationException((string) $error);
+            }
+
+            return $email;
+        }),
+    )),
+    prompt: new Validable(
+        element: new Prompt(
+            element: new Message(
+                sequence: sequenceDefault("Would you like to add another author?(y/n)"),
+                output: $output,
+            ),
+            input: $input,
+        ),
+        validator: new CallbackValidator(function (string $value) {
+            if (! in_array($value, ['y', 'Y', 'n', 'N'], true)) {
+                $error = sequenceError(sprintf('Answer "%s" or "%s"', 'y', 'n'));
+
+                throw new ValidationException((string) $error);
+            }
+
+            return strtolower($value);
+        }),
+    ),
+    predicate: function (string $value) {
+        return 'y' === $value;
     },
-    function () {
-        $email = prompt("Author email:", 'Themosis\validateText');
-        return ['email', $email];
-    }
 );
 
-writeLine("You inserted: {$vendor}/{$package}: {$description}");
-var_dump($authors);
+$vendor = $vendorPrompt();
+$package = $packagePrompt();
+$description = $descriptionPrompt();
+$authors = $authorsPrompt();
+
+var_dump($vendor, $package, $description, $authors);
