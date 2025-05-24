@@ -105,7 +105,7 @@ final class PromptTest extends TestCase
         $output = new LocalInMemoryOutput();
 
         $prompt = (new Composable(
-            parent: new Message(
+            element: new Message(
                 sequence: (new Sequence())->add(new Text("Please enter an author:\n")),
                 output: $output,
             ),
@@ -212,7 +212,7 @@ final class PromptTest extends TestCase
 
         $prompt = new Collection(
             element: (new Composable(
-                parent: new Message(
+                element: new Message(
                     sequence: (new Sequence())->add(new Text("Add an author:\n")),
                     output: $output,
                 ),

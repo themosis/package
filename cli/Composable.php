@@ -12,10 +12,10 @@ final class Composable extends Element
     private array $children = [];
 
     public function __construct(
-        private Element $parent,
+        private Element $element,
     ) {
         parent::__construct(
-            output: $parent->output(),
+            output: $element->output(),
         );
     }
 
@@ -36,18 +36,18 @@ final class Composable extends Element
 
     public function render(): static
     {
-        $localValue = [];
+        $value = [];
 
-        $this->parent->render();
+        $this->element->render();
 
-        $localValue['parent'] = $this->parent->value;
+        $value['parent'] = $this->element->value();
 
         foreach ($this->children as $name => $child) {
             $child->render();
-            $localValue[$name] = $child->value();
+            $value[$name] = $child->value();
         }
 
-        $this->value = $localValue;
+        $this->value = $value;
 
         return $this;
     }
