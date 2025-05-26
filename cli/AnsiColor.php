@@ -8,7 +8,6 @@ final class AnsiColor implements Color
 {
     private function __construct(
         private int $code,
-        private bool $isBright = false,
     ) {}
 
     public static function black(): self
@@ -18,11 +17,15 @@ final class AnsiColor implements Color
         );
     }
 
+    public static function base(): self
+    {
+        return self::black();
+    }
+
     public static function brightBlack(): self
     {
         return new self(
-            code: 30,
-            isBright: true,
+            code: 90,
         );
     }
 
@@ -36,8 +39,7 @@ final class AnsiColor implements Color
     public static function brightRed(): self
     {
         return new self(
-            code: 31,
-            isBright: true,
+            code: 91,
         );
     }
 
@@ -51,8 +53,7 @@ final class AnsiColor implements Color
     public static function brightGreen(): self
     {
         return new self(
-            code: 32,
-            isBright: true,
+            code: 92,
         );
     }
 
@@ -66,8 +67,7 @@ final class AnsiColor implements Color
     public static function brightYellow(): self
     {
         return new self(
-            code: 33,
-            isBright: true,
+            code: 93,
         );
     }
 
@@ -81,8 +81,7 @@ final class AnsiColor implements Color
     public static function brightBlue(): self
     {
         return new self(
-            code: 34,
-            isBright: true,
+            code: 94,
         );
     }
 
@@ -96,8 +95,7 @@ final class AnsiColor implements Color
     public static function brightMagenta(): self
     {
         return new self(
-            code: 35,
-            isBright: true,
+            code: 95,
         );
     }
 
@@ -111,8 +109,7 @@ final class AnsiColor implements Color
     public static function brightCyan(): self
     {
         return new self(
-            code: 36,
-            isBright: true,
+            code: 96,
         );
     }
 
@@ -123,11 +120,15 @@ final class AnsiColor implements Color
         );
     }
 
+    public static function reverse(): self
+    {
+        return self::white();
+    }
+
     public static function brightWhite(): self
     {
         return new self(
-            code: 37,
-            isBright: true,
+            code: 97,
         );
     }
 
@@ -137,10 +138,6 @@ final class AnsiColor implements Color
             ? $this->code
             : $this->code + 10;
 
-        $codeAsString = $this->isBright
-            ? "{$code};1"
-            : $code;
-
         $unicodeEscape = "\u{001b}";
 
         /**
@@ -148,6 +145,6 @@ final class AnsiColor implements Color
          * It starts with an escape sequence followed by a left square bracket,
          * the sequence color code and ending with the single "m" character.
          */
-        return "{$unicodeEscape}[{$codeAsString}m";
+        return "{$unicodeEscape}[{$code}m";
     }
 }

@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Themosis\Cli;
 
-use Themosis\Cli\Validation\ValidationException;
+use Themosis\Cli\Validation\InvalidInput;
 use Themosis\Cli\Validation\Validator;
 
 final class Validable extends Element
@@ -26,7 +26,7 @@ final class Validable extends Element
             $this->value = $this
                 ->validator
                 ->validate($this->element->value());
-        } catch (ValidationException $exception) {
+        } catch (InvalidInput $exception) {
             $this->output->write($exception->getMessage());
             $this->render();
         }

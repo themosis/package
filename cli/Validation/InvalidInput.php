@@ -6,4 +6,4 @@ namespace Themosis\Cli\Validation;
 
 use RuntimeException;
 
-final class ValidationException extends RuntimeException {}
+final class InvalidInput extends RuntimeException {}

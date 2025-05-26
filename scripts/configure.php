@@ -5,6 +5,8 @@ declare(strict_types=1);
 namespace Themosis;
 
 use Themosis\Cli\AnsiColor;
+use Themosis\Cli\BackgroundColor;
+use Themosis\Cli\Bold;
 use Themosis\Cli\Collection;
 use Themosis\Cli\Composable;
 use Themosis\Cli\ForegroundColor;
@@ -18,7 +20,7 @@ use Themosis\Cli\Sequence;
 use Themosis\Cli\Text;
 use Themosis\Cli\Validable;
 use Themosis\Cli\Validation\CallbackValidator;
-use Themosis\Cli\Validation\ValidationException;
+use Themosis\Cli\Validation\InvalidInput;
 
 require dirname(__DIR__) . '/cli/autoload.php';
 
@@ -44,10 +46,38 @@ function json(string $path): \stdClass
 function sequenceDefault(string $text): Sequence
 {
     return (new Sequence())
+        ->add(new Reset())
+        ->add(new ForegroundColor(AnsiColor::reverse()))
+        ->add(new Text($text))
+        ->add(new LineFeed())
         ->add(new ForegroundColor(AnsiColor::green()))
+        ->add(new Bold())
+        ->add(new Text("> "))
+        ->add(new Reset())
+        ->add(new ForegroundColor(AnsiColor::reverse()));
+}
+
+function sequenceTitle(string $text): Sequence
+{
+    return (new Sequence())
         ->add(new Text($text))
         ->add(new LineFeed())
         ->add(new Reset());
+}
+
+function sequencePredicate(string $text, string $expectation): Sequence
+{
+    return (new Sequence())
+        ->add(new Reset())
+        ->add(new Text($text))
+        ->add(new ForegroundColor(AnsiColor::yellow()))
+        ->add(new Text($expectation))
+        ->add(new LineFeed())
+        ->add(new ForegroundColor(AnsiColor::green()))
+        ->add(new Bold())
+        ->add(new Text("> "))
+        ->add(new Reset())
+        ->add(new ForegroundColor(AnsiColor::reverse()));
 }
 
 function sequenceError(string $text): Sequence
@@ -62,10 +92,34 @@ function sequenceError(string $text): Sequence
 $output = new PhpStdOutput();
 $input = new PhpStdInput();
 
+$title = " Themosis Package Tool ";
+
+$introduction = new Message(
+    sequence: (new Sequence())
+        ->add(new BackgroundColor(AnsiColor::cyan()))
+        ->add(new ForegroundColor(AnsiColor::base()))
+        ->add(new Bold())
+        ->add(new Text(str_repeat(" ", strlen($title))))
+        ->add(new LineFeed())
+        ->add(new Text($title))
+        ->add(new LineFeed())
+        ->add(new Text(str_repeat(" ", strlen($title))))
+        ->add(new LineFeed())
+        ->add(new Reset())
+        ->add(new LineFeed()),
+    output: $output,
+);
+
+$vendorName = (new Sequence())
+    ->add(new Bold())
+    ->add(new Text("vendor"))
+    ->add(new Reset())
+    ->add(new ForegroundColor(AnsiColor::reverse()));
+
 $vendorPrompt = new Validable(
     element: new Prompt(
         element: new Message(
-            sequence: sequenceDefault("Please insert a vendor name:"),
+            sequence: sequenceDefault("Please insert a {$vendorName} name:"),
             output: $output,
         ),
         input: $input,
@@ -74,17 +128,29 @@ $vendorPrompt = new Validable(
         if (empty($value)) {
             $error = sequenceError("A vendor name is required.");
 
-            throw new ValidationException((string) $error);
+            throw new InvalidInput((string) $error);
         }
 
-        return strtolower($value);
+        if (preg_match('/^[a-z0-9]([_.-]?[a-z0-9]+)*$/', $value) !== 1) {
+            $error = sequenceError("A vendor name must be a lowercased alphanumeric string without any special characters.");
+
+            throw new InvalidInput((string) $error);
+        }
+
+        return $value;
     }),
 );
+
+$packageName = (new Sequence())
+    ->add(new Bold())
+    ->add(new Text("package"))
+    ->add(new Reset())
+    ->add(new ForegroundColor(AnsiColor::reverse()));
 
 $packagePrompt = new Validable(
     element: new Prompt(
         element: new Message(
-            sequence: sequenceDefault("Please insert a package name:"),
+            sequence: sequenceDefault("Please insert a {$packageName} name:"),
             output: $output,
         ),
         input: $input,
@@ -93,23 +159,29 @@ $packagePrompt = new Validable(
         if (empty($value)) {
             $error = sequenceError("A package name is required.");
 
-            throw new ValidationException((string) $error);
+            throw new InvalidInput((string) $error);
         }
 
-        if (strpos($value, '/') !== false) {
-            $error = sequenceError("A '/' character is not allowed in a vendor name.");
+        if (preg_match('/^[a-z0-9](([_.]|-{1,2})?[a-z0-9]+)*$/', $value) !== 1) {
+            $error = sequenceError("A package name must be a lowercased alphanumeric string without any special characters.");
 
-            throw new ValidationException((string) $error);
+            throw new InvalidInput((string) $error);
         }
 
         return strtolower($value);
     }),
 );
 
+$descriptionName = (new Sequence())
+    ->add(new Bold())
+    ->add(new Text("description"))
+    ->add(new Reset())
+    ->add(new ForegroundColor(AnsiColor::reverse()));
+
 $descriptionPrompt = new Validable(
     element: new Prompt(
         element: new Message(
-            sequence: sequenceDefault("Please insert a description:"),
+            sequence: sequenceDefault("Please insert a {$descriptionName}:"),
             output: $output,
         ),
         input: $input,
@@ -118,23 +190,35 @@ $descriptionPrompt = new Validable(
         if (empty($value)) {
             $error = sequenceError("A description is required.");
 
-            throw new ValidationException((string) $error);
+            throw new InvalidInput((string) $error);
         }
 
         return $value;
     }),
 );
 
+$authorName = (new Sequence())
+    ->add(new Bold())
+    ->add(new Text("name"))
+    ->add(new Reset())
+    ->add(new ForegroundColor(AnsiColor::reverse()));
+
+$authorEmail = (new Sequence())
+    ->add(new Bold())
+    ->add(new Text("email"))
+    ->add(new Reset())
+    ->add(new ForegroundColor(AnsiColor::reverse()));
+
 $authorsPrompt = new Collection(
     element: (new Composable(
         element: new Message(
-            sequence: sequenceDefault("Please insert an author:"),
+            sequence: sequenceTitle("Please insert an author."),
             output: $output,
         ),
     ))->add('name', new Validable(
         element: new Prompt(
             element: new Message(
-                sequence: sequenceDefault("Enter author's name:"),
+                sequence: sequenceDefault("Enter author's {$authorName}:"),
                 output: $output,
             ),
             input: $input,
@@ -143,7 +227,7 @@ $authorsPrompt = new Collection(
             if (empty($name)) {
                 $error = sequenceError("An author's name is required.");
 
-                throw new ValidationException((string) $error);
+                throw new InvalidInput((string) $error);
             }
 
             return $name;
@@ -151,7 +235,7 @@ $authorsPrompt = new Collection(
     ))->add('email', new Validable(
         element: new Prompt(
             element: new Message(
-                sequence: sequenceDefault("Enter author's email:"),
+                sequence: sequenceDefault("Enter author's {$authorEmail}:"),
                 output: $output,
             ),
             input: $input,
@@ -160,13 +244,13 @@ $authorsPrompt = new Collection(
             if (empty($email)) {
                 $error = sequenceError("An author's email is required.");
 
-                throw new ValidationException((string) $error);
+                throw new InvalidInput((string) $error);
             }
 
             if (false === filter_var($email, FILTER_VALIDATE_EMAIL)) {
                 $error = sequenceError("Invalid email address.");
 
-                throw new ValidationException((string) $error);
+                throw new InvalidInput((string) $error);
             }
 
             return $email;
@@ -175,7 +259,7 @@ $authorsPrompt = new Collection(
     prompt: new Validable(
         element: new Prompt(
             element: new Message(
-                sequence: sequenceDefault("Would you like to add another author?(y/n)"),
+                sequence: sequencePredicate("Would you like to add another author?", "(y/n)"),
                 output: $output,
             ),
             input: $input,
@@ -184,7 +268,7 @@ $authorsPrompt = new Collection(
             if (! in_array($value, ['y', 'Y', 'n', 'N'], true)) {
                 $error = sequenceError(sprintf('Answer "%s" or "%s"', 'y', 'n'));
 
-                throw new ValidationException((string) $error);
+                throw new InvalidInput((string) $error);
             }
 
             return strtolower($value);
@@ -194,6 +278,8 @@ $authorsPrompt = new Collection(
         return 'y' === $value;
     },
 );
+
+$introduction();
 
 $vendor = $vendorPrompt();
 $package = $packagePrompt();

@@ -15,7 +15,7 @@ use Themosis\Cli\Sequence;
 use Themosis\Cli\Text;
 use Themosis\Cli\Validable;
 use Themosis\Cli\Validation\CallbackValidator;
-use Themosis\Cli\Validation\ValidationException;
+use Themosis\Cli\Validation\InvalidInput;
 
 final class PromptTest extends TestCase
 {
@@ -75,7 +75,7 @@ final class PromptTest extends TestCase
 
                 if (empty($texts[$iteration])) {
                     $iteration++;
-                    throw new ValidationException("Invalid name, try again!\n");
+                    throw new InvalidInput("Invalid name, try again!\n");
                 }
 
                 return $texts[$iteration];
@@ -121,7 +121,7 @@ final class PromptTest extends TestCase
             ),
             validator: new CallbackValidator(function (string $value) {
                 if (empty($value)) {
-                    throw new ValidationException("Author's name is required.\n");
+                    throw new InvalidInput("Author's name is required.\n");
                 }
 
                 return $value;
@@ -143,7 +143,7 @@ final class PromptTest extends TestCase
 
                 if (false === filter_var($value, FILTER_VALIDATE_EMAIL)) {
                     $iteration++;
-                    throw new ValidationException("Invalid email address.\n");
+                    throw new InvalidInput("Invalid email address.\n");
                 }
 
                 return $value;
@@ -184,7 +184,7 @@ final class PromptTest extends TestCase
                 ),
                 validator: new CallbackValidator(function (string $value) {
                     if (! in_array($value, ['y', 'n'])) {
-                        throw new ValidationException("Enter either y or n.\n");
+                        throw new InvalidInput("Enter either y or n.\n");
                     }
 
                     return $value;
