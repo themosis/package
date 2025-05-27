@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Themosis\Cli;
 
-interface Node
+interface Attribute
 {
-    public function content(): string;
+    public function value(): string;
 }

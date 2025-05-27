@@ -11,7 +11,7 @@ use Themosis\Cli\Input;
 use Themosis\Cli\Message;
 use Themosis\Cli\Output;
 use Themosis\Cli\Prompt;
-use Themosis\Cli\Sequence;
+use Themosis\Cli\GraphicSequence;
 use Themosis\Cli\Text;
 use Themosis\Cli\Validable;
 use Themosis\Cli\Validation\CallbackValidator;
@@ -26,7 +26,7 @@ final class PromptTest extends TestCase
 
         $prompt = new Prompt(
             element: new Message(
-                sequence: $sequence = (new Sequence())->add(new Text("Please insert nothing:")),
+                sequence: $sequence = (new GraphicSequence())->add(new Text("Please insert nothing:")),
                 output: $output = new LocalInMemoryOutput(),
             ),
             input: $input,
@@ -47,7 +47,7 @@ final class PromptTest extends TestCase
 
         $prompt = new Prompt(
             element: new Message(
-                sequence: $sequence = (new Sequence())->add(new Text("What's your name?\n")),
+                sequence: $sequence = (new GraphicSequence())->add(new Text("What's your name?\n")),
                 output: $output = new LocalInMemoryOutput(),
             ),
             input: $input,
@@ -85,7 +85,7 @@ final class PromptTest extends TestCase
         $prompt = new Validable(
             new Prompt(
                 element: new Message(
-                    sequence: (new Sequence())->add(new Text("Please insert your name:\n")),
+                    sequence: (new GraphicSequence())->add(new Text("Please insert your name:\n")),
                     output: $output,
                 ),
                 input: $input,
@@ -106,7 +106,7 @@ final class PromptTest extends TestCase
 
         $prompt = (new Composable(
             element: new Message(
-                sequence: (new Sequence())->add(new Text("Please enter an author:\n")),
+                sequence: (new GraphicSequence())->add(new Text("Please enter an author:\n")),
                 output: $output,
             ),
         ));
@@ -114,7 +114,7 @@ final class PromptTest extends TestCase
         $prompt->add('name', new Validable(
             element: new Prompt(
                 element: new Message(
-                    sequence: (new Sequence())->add(new Text("Insert author's name:\n")),
+                    sequence: (new GraphicSequence())->add(new Text("Insert author's name:\n")),
                     output: $output,
                 ),
                 input: new LocalInMemoryInput("Jean Pass")
@@ -133,7 +133,7 @@ final class PromptTest extends TestCase
         $prompt->add('email', new Validable(
             element: new Prompt(
                 element: new Message(
-                    sequence: (new Sequence())->add(new Text("Insert author's email:\n")),
+                    sequence: (new GraphicSequence())->add(new Text("Insert author's email:\n")),
                     output: $output
                 ),
                 input: new LocalInMemoryInput(implode(',', ["not-an-email", "jean@champagne.biz"])),
@@ -165,7 +165,7 @@ final class PromptTest extends TestCase
             element: new Validable(
                 element: new Prompt(
                     element: new Message(
-                        sequence: (new Sequence())->add(new Text("Insert a name:\n")),
+                        sequence: (new GraphicSequence())->add(new Text("Insert a name:\n")),
                         output: $output,
                     ),
                     input: new LocalInMemoryInput('Lolita'),
@@ -177,7 +177,7 @@ final class PromptTest extends TestCase
             prompt: new Validable(
                 element: new Prompt(
                     element: new Message(
-                        sequence: (new Sequence())->add(new Text("Add another name?(y/n)\n")),
+                        sequence: (new GraphicSequence())->add(new Text("Add another name?(y/n)\n")),
                         output: $output,
                     ),
                     input: new LocalInMemoryInput('n'),
@@ -213,14 +213,14 @@ final class PromptTest extends TestCase
         $prompt = new Collection(
             element: (new Composable(
                 element: new Message(
-                    sequence: (new Sequence())->add(new Text("Add an author:\n")),
+                    sequence: (new GraphicSequence())->add(new Text("Add an author:\n")),
                     output: $output,
                 ),
             ))
                 ->add('name', new Validable(
                     element: new Prompt(
                         element: new Message(
-                            sequence: (new Sequence())->add(new Text("Enter author's name:\n")),
+                            sequence: (new GraphicSequence())->add(new Text("Enter author's name:\n")),
                             output: $output,
                         ),
                         input: new LocalInMemoryInput(implode(',', ["Laurent", "Joao"]))
@@ -233,7 +233,7 @@ final class PromptTest extends TestCase
                 ->add('email', new Validable(
                     element: new Prompt(
                         element: new Message(
-                            sequence: (new Sequence())->add(new Text("Enter author's email:\n")),
+                            sequence: (new GraphicSequence())->add(new Text("Enter author's email:\n")),
                             output: $output,
                         ),
                         input: new LocalInMemoryInput(implode(',', ["laurent@web.com", "joao@web.pt"]))
@@ -246,7 +246,7 @@ final class PromptTest extends TestCase
             prompt: new Validable(
                 element: new Prompt(
                     element: new Message(
-                        sequence: (new Sequence())->add(new Text("Would you like to add an author?(y/n)\n")),
+                        sequence: (new GraphicSequence())->add(new Text("Would you like to add an author?(y/n)\n")),
                         output: $output,
                     ),
                     input: new LocalInMemoryInput(implode(',', ["y", "n"])),

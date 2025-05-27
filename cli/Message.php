@@ -7,7 +7,7 @@ namespace Themosis\Cli;
 final class Message extends Element
 {
     public function __construct(
-        private Sequence $sequence,
+        private GraphicSequence $sequence,
         protected Output $output,
     ) {
         parent::__construct($output);

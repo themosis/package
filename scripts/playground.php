@@ -9,12 +9,12 @@ use Themosis\Cli\PhpStdInput;
 use Themosis\Cli\PhpStdOutput;
 use Themosis\Cli\Prompt;
 use Themosis\Cli\Reset;
-use Themosis\Cli\Sequence;
+use Themosis\Cli\GraphicSequence;
 use Themosis\Cli\Text;
 
 require './cli/autoload.php';
 
-$sequence = (new Sequence())
+$sequence = (new GraphicSequence())
     ->add(new BackgroundColor(AnsiColor::blue()))
     ->add(new ForegroundColor(AnsiColor::brightBlack()))
     ->add(new Text("This text has a "))
@@ -29,7 +29,7 @@ $output->write($sequence);
 
 $prompt = new Prompt(
     element: new Message(
-        sequence: (new Sequence())->add(new Text("Insert a name:\n")),
+        sequence: (new GraphicSequence())->add(new Text("Insert a name:\n")),
         output: $output,
     ),
     input: new PhpStdInput(),
@@ -38,7 +38,7 @@ $prompt = new Prompt(
 $result = $prompt();
 
 $output->write(
-    (new Sequence())
+    (new GraphicSequence())
         ->add(new BackgroundColor(AnsiColor::green()))
         ->add(new ForegroundColor(AnsiColor::black()))
         ->add(new Text("Success:"))

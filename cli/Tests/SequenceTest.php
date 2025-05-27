@@ -10,7 +10,7 @@ use Themosis\Cli\BackgroundColor;
 use Themosis\Cli\ForegroundColor;
 use Themosis\Cli\LineFeed;
 use Themosis\Cli\Reset;
-use Themosis\Cli\Sequence;
+use Themosis\Cli\GraphicSequence;
 use Themosis\Cli\Text;
 
 final class SequenceTest extends TestCase
@@ -18,7 +18,7 @@ final class SequenceTest extends TestCase
     #[Test]
     public function itRenders_EmptySequence(): void
     {
-        $sequence = new Sequence();
+        $sequence = new GraphicSequence();
 
         $this->assertEmpty($sequence->content());
         $this->assertEmpty((string) $sequence);
@@ -27,7 +27,7 @@ final class SequenceTest extends TestCase
     #[Test]
     public function itRenders_Text(): void
     {
-        $sequence = (new Sequence())
+        $sequence = (new GraphicSequence())
             ->add(new Text($text = 'This is some text'));
 
         $this->assertSame($text, $sequence->content());
@@ -37,7 +37,7 @@ final class SequenceTest extends TestCase
     #[Test]
     public function itRenders_Text_WithForeground_AndBackgroundColors(): void
     {
-        $sequence = (new Sequence())
+        $sequence = (new GraphicSequence())
             ->add(new BackgroundColor(AnsiColor::red()))
             ->add(new ForegroundColor(AnsiColor::yellow()))
             ->add(new Text($text = "This text has a red background and a yellow foreground"))

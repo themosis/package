@@ -4,7 +4,7 @@ declare(strict_types=1);
 
 namespace Themosis\Cli;
 
-final class AnsiColor implements Color
+final class AnsiColor
 {
     private function __construct(
         private int $code,
