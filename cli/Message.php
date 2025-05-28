@@ -7,7 +7,7 @@ namespace Themosis\Cli;
 final class Message extends Element
 {
     public function __construct(
-        private GraphicSequence $sequence,
+        private Code $sequence,
         protected Output $output,
     ) {
         parent::__construct($output);
@@ -15,7 +15,7 @@ final class Message extends Element
 
     public function render(): static
     {
-        $this->output->write($this->sequence->content());
+        $this->output->write($this->sequence->get());
 
         return $this;
     }
