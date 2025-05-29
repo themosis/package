@@ -27,7 +27,7 @@ final class Validable extends Element
                 ->validator
                 ->validate($this->element->value());
         } catch (InvalidInput $exception) {
-            $this->output->write($exception->getMessage());
+            $this->output->write($exception->getSequence()->get());
             $this->render();
         }
 

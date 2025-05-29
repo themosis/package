@@ -8,10 +8,11 @@ use PHPUnit\Framework\Attributes\Test;
 use Themosis\Cli\Collection;
 use Themosis\Cli\Composable;
 use Themosis\Cli\Input;
+use Themosis\Cli\LineFeed;
 use Themosis\Cli\Message;
 use Themosis\Cli\Output;
 use Themosis\Cli\Prompt;
-use Themosis\Cli\GraphicSequence;
+use Themosis\Cli\Sequence;
 use Themosis\Cli\Text;
 use Themosis\Cli\Validable;
 use Themosis\Cli\Validation\CallbackValidator;
@@ -26,7 +27,7 @@ final class PromptTest extends TestCase
 
         $prompt = new Prompt(
             element: new Message(
-                sequence: $sequence = (new GraphicSequence())->add(new Text("Please insert nothing:")),
+                sequence: $sequence = Sequence::make()->append(new Text("Please insert nothing:")),
                 output: $output = new LocalInMemoryOutput(),
             ),
             input: $input,
@@ -35,7 +36,7 @@ final class PromptTest extends TestCase
         $result = $prompt();
 
         $this->assertEmpty($result);
-        $this->assertSame($sequence->content(), $output->output);
+        $this->assertSame($sequence->get(), $output->output);
     }
 
     #[Test]
@@ -47,7 +48,7 @@ final class PromptTest extends TestCase
 
         $prompt = new Prompt(
             element: new Message(
-                sequence: $sequence = (new GraphicSequence())->add(new Text("What's your name?\n")),
+                sequence: $sequence = Sequence::make()->append(new Text("What's your name?"))->append(new LineFeed()),
                 output: $output = new LocalInMemoryOutput(),
             ),
             input: $input,
@@ -56,7 +57,7 @@ final class PromptTest extends TestCase
         $result = $prompt();
 
         $this->assertSame('Emile Zolair', $result);
-        $this->assertSame($sequence->content(), $output->output);
+        $this->assertSame($sequence->get(), $output->output);
     }
 
     #[Test]
@@ -75,7 +76,12 @@ final class PromptTest extends TestCase
 
                 if (empty($texts[$iteration])) {
                     $iteration++;
-                    throw new InvalidInput("Invalid name, try again!\n");
+
+                    $errorSequence = Sequence::make()
+                        ->append($text = new Text("Invalid name, try again!"))
+                        ->append(new LineFeed());
+
+                    throw new InvalidInput((string) $text, $errorSequence);
                 }
 
                 return $texts[$iteration];
@@ -85,7 +91,7 @@ final class PromptTest extends TestCase
         $prompt = new Validable(
             new Prompt(
                 element: new Message(
-                    sequence: (new GraphicSequence())->add(new Text("Please insert your name:\n")),
+                    sequence: Sequence::make()->append(new Text("Please insert your name:")),
                     output: $output,
                 ),
                 input: $input,
@@ -95,7 +101,7 @@ final class PromptTest extends TestCase
 
         $result = $prompt();
 
-        $this->assertSame("Please insert your name:\nInvalid name, try again!\nPlease insert your name:\n", $output->output);
+        $this->assertSame("\u{001b}[mPlease insert your name:\u{001b}[mInvalid name, try again!\u{000a}\u{001b}[mPlease insert your name:", $output->output);
         $this->assertSame('Julien', $result);
     }
 
@@ -106,7 +112,9 @@ final class PromptTest extends TestCase
 
         $prompt = (new Composable(
             element: new Message(
-                sequence: (new GraphicSequence())->add(new Text("Please enter an author:\n")),
+                sequence: Sequence::make()
+                    ->append(new Text("Please enter an author:"))
+                    ->append(new LineFeed()),
                 output: $output,
             ),
         ));
@@ -114,14 +122,18 @@ final class PromptTest extends TestCase
         $prompt->add('name', new Validable(
             element: new Prompt(
                 element: new Message(
-                    sequence: (new GraphicSequence())->add(new Text("Insert author's name:\n")),
+                    sequence: Sequence::make()->append(new Text("Insert author's name:")),
                     output: $output,
                 ),
                 input: new LocalInMemoryInput("Jean Pass")
             ),
             validator: new CallbackValidator(function (string $value) {
                 if (empty($value)) {
-                    throw new InvalidInput("Author's name is required.\n");
+                    $errorSequence = Sequence::make()
+                        ->append($text = new Text("Author's name is required."))
+                        ->append(new LineFeed());
+
+                    throw new InvalidInput((string) $text, $errorSequence);
                 }
 
                 return $value;
@@ -133,7 +145,7 @@ final class PromptTest extends TestCase
         $prompt->add('email', new Validable(
             element: new Prompt(
                 element: new Message(
-                    sequence: (new GraphicSequence())->add(new Text("Insert author's email:\n")),
+                    sequence: Sequence::make()->append(new Text("Insert author's email:")),
                     output: $output
                 ),
                 input: new LocalInMemoryInput(implode(',', ["not-an-email", "jean@champagne.biz"])),
@@ -143,7 +155,12 @@ final class PromptTest extends TestCase
 
                 if (false === filter_var($value, FILTER_VALIDATE_EMAIL)) {
                     $iteration++;
-                    throw new InvalidInput("Invalid email address.\n");
+
+                    $errorSequence = Sequence::make()
+                        ->append($text = new Text("Invalid email address."))
+                        ->append(new LineFeed());
+
+                    throw new InvalidInput((string) $text, $errorSequence);
                 }
 
                 return $value;
@@ -152,7 +169,7 @@ final class PromptTest extends TestCase
 
         $result = $prompt();
 
-        $this->assertSame("Please enter an author:\nInsert author's name:\nInsert author's email:\nInvalid email address.\nInsert author's email:\n", $output->output);
+        $this->assertSame("\u{001b}[mPlease enter an author:\u{000a}\u{001b}[mInsert author's name:\u{001b}[mInsert author's email:\u{001b}[mInvalid email address.\u{000a}\u{001b}[mInsert author's email:", $output->output);
         $this->assertSame(['parent' => null, 'name' => 'Jean Pass', 'email' => 'jean@champagne.biz'], $result);
     }
 
@@ -165,7 +182,8 @@ final class PromptTest extends TestCase
             element: new Validable(
                 element: new Prompt(
                     element: new Message(
-                        sequence: (new GraphicSequence())->add(new Text("Insert a name:\n")),
+                        sequence: Sequence::make()->append(new Text("Insert a name:"))
+                            ->append(new LineFeed()),
                         output: $output,
                     ),
                     input: new LocalInMemoryInput('Lolita'),
@@ -177,14 +195,19 @@ final class PromptTest extends TestCase
             prompt: new Validable(
                 element: new Prompt(
                     element: new Message(
-                        sequence: (new GraphicSequence())->add(new Text("Add another name?(y/n)\n")),
+                        sequence: Sequence::make()->append(new Text("Add another name?(y/n)"))
+                            ->append(new LineFeed()),
                         output: $output,
                     ),
                     input: new LocalInMemoryInput('n'),
                 ),
                 validator: new CallbackValidator(function (string $value) {
                     if (! in_array($value, ['y', 'n'])) {
-                        throw new InvalidInput("Enter either y or n.\n");
+                        $errorSequence = Sequence::make()
+                            ->append($text = new Text("Enter either y or n."))
+                            ->append(new LineFeed());
+
+                        throw new InvalidInput((string) $text, $errorSequence);
                     }
 
                     return $value;
@@ -200,7 +223,7 @@ final class PromptTest extends TestCase
         $this->assertTrue(is_array($result));
         $this->assertSame(['Lolita'], $result);
 
-        $this->assertSame("Insert a name:\nAdd another name?(y/n)\n", $output->output);
+        $this->assertSame("\u{001b}[mInsert a name:\u{000a}\u{001b}[mAdd another name?(y/n)\u{000a}", $output->output);
     }
 
     #[Test]
@@ -213,14 +236,18 @@ final class PromptTest extends TestCase
         $prompt = new Collection(
             element: (new Composable(
                 element: new Message(
-                    sequence: (new GraphicSequence())->add(new Text("Add an author:\n")),
+                    sequence: Sequence::make()
+                        ->append(new Text("Add an author:"))
+                        ->append(new LineFeed()),
                     output: $output,
                 ),
             ))
                 ->add('name', new Validable(
                     element: new Prompt(
                         element: new Message(
-                            sequence: (new GraphicSequence())->add(new Text("Enter author's name:\n")),
+                            sequence: Sequence::make()
+                                ->append(new Text("Enter author's name:"))
+                                ->append(new LineFeed()),
                             output: $output,
                         ),
                         input: new LocalInMemoryInput(implode(',', ["Laurent", "Joao"]))
@@ -233,7 +260,9 @@ final class PromptTest extends TestCase
                 ->add('email', new Validable(
                     element: new Prompt(
                         element: new Message(
-                            sequence: (new GraphicSequence())->add(new Text("Enter author's email:\n")),
+                            sequence: Sequence::make()
+                                ->append(new Text("Enter author's email:"))
+                                ->append(new LineFeed()),
                             output: $output,
                         ),
                         input: new LocalInMemoryInput(implode(',', ["laurent@web.com", "joao@web.pt"]))
@@ -246,7 +275,9 @@ final class PromptTest extends TestCase
             prompt: new Validable(
                 element: new Prompt(
                     element: new Message(
-                        sequence: (new GraphicSequence())->add(new Text("Would you like to add an author?(y/n)\n")),
+                        sequence: Sequence::make()
+                            ->append(new Text("Would you like to add an author?(y/n)"))
+                            ->append(new LineFeed()),
                         output: $output,
                     ),
                     input: new LocalInMemoryInput(implode(',', ["y", "n"])),
@@ -280,7 +311,7 @@ final class PromptTest extends TestCase
             'email' => 'joao@web.pt',
         ], $result[1]);
 
-        $this->assertSame("Add an author:\nEnter author's name:\nEnter author's email:\nWould you like to add an author?(y/n)\nAdd an author:\nEnter author's name:\nEnter author's email:\nWould you like to add an author?(y/n)\n", $output->output);
+        $this->assertSame("\u{001b}[mAdd an author:\u{000a}\u{001b}[mEnter author's name:\u{000a}\u{001b}[mEnter author's email:\u{000a}\u{001b}[mWould you like to add an author?(y/n)\u{000a}\u{001b}[mAdd an author:\u{000a}\u{001b}[mEnter author's name:\u{000a}\u{001b}[mEnter author's email:\u{000a}\u{001b}[mWould you like to add an author?(y/n)\u{000a}", $output->output);
     }
 }
 
