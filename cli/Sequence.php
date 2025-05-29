@@ -6,7 +6,7 @@ namespace Themosis\Cli;
 
 final class Sequence
 {
-    public static function display(): CsiSequence
+    public static function make(): CsiSequence
     {
         return CsiSequence::selectGraphicRendition();
     }

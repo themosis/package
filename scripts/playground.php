@@ -1,7 +1,6 @@
 <?php
 
 use Themosis\Cli\BackgroundColor;
-use Themosis\Cli\Color;
 use Themosis\Cli\Display;
 use Themosis\Cli\ForegroundColor;
 use Themosis\Cli\LineFeed;
@@ -14,20 +13,20 @@ use Themosis\Cli\Text;
 
 require './cli/autoload.php';
 
-$sequence = Sequence::display()
-    ->attribute(new BackgroundColor(Color::blue()))
-    ->attribute(new ForegroundColor(Color::base()))
+$sequence = Sequence::make()
+    ->attribute(BackgroundColor::blue())
+    ->attribute(ForegroundColor::base())
     ->attribute(Display::bold())
     ->append(new Text("Hello World!"))
-    ->append(Sequence::display()
-        ->attribute(new BackgroundColor(Color::brightCyan()))
-        ->attribute(new ForegroundColor(Color::base()))
+    ->append(Sequence::make()
+        ->attribute(BackgroundColor::brightCyan())
+        ->attribute(ForegroundColor::base())
         ->append(new Text("This is a test!")))
-    ->append(Sequence::display()
-        ->attribute(new BackgroundColor(Color::brightRed()))
-        ->attribute(new ForegroundColor(Color::base()))
+    ->append(Sequence::make()
+        ->attribute(BackgroundColor::brightRed())
+        ->attribute(ForegroundColor::base())
         ->append(new Text("Oops, something's wrong!")))
-    ->append(Sequence::display()->attribute(Display::reset()))
+    ->append(Sequence::make()->attribute(Display::reset()))
     ->append(new LineFeed());
 
 $output = new PhpStdOutput();
@@ -35,7 +34,7 @@ $output->write($sequence);
 
 $prompt = new Prompt(
     element: new Message(
-        sequence: Sequence::display()
+        sequence: Sequence::make()
             ->append(new Text("Insert a name:"))
             ->append(new LineFeed()),
         output: $output,
@@ -45,14 +44,14 @@ $prompt = new Prompt(
 
 $result = $prompt();
 
-$output->write(Sequence::display()
+$output->write(Sequence::make()
     ->attribute(Display::bold())
-    ->attribute(new ForegroundColor(Color::green()))
+    ->attribute(ForegroundColor::green())
     ->append(new Text("You inserted: "))
-    ->append(Sequence::display()->attribute(Display::reset()))
-               ->append(Sequence::display()
-                        ->attribute(Display::bold())
-                        ->attribute(new ForegroundColor(Color::reverse()))
-                        ->append(new Text($result)))
-               ->append(Sequence::display()->attribute(Display::reset())
-                        ->append(new LineFeed())));
+    ->append(Sequence::make()->attribute(Display::reset()))
+    ->append(Sequence::make()
+        ->attribute(Display::bold())
+        ->attribute(ForegroundColor::reverse())
+        ->append(new Text($result)))
+    ->append(Sequence::make()->attribute(Display::reset())
+        ->append(new LineFeed())));
