@@ -1,3 +1,7 @@
+SHELL=/bin/sh
+
+.PHONY: test coverage
+
 test:
 	php tools/phpunit12/vendor/bin/phpunit --configuration cli/phpunit.xml
 
