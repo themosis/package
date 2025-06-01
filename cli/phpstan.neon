@@ -1,0 +1,8 @@
+parameters:
+  level: max
+  bootstrapFiles:
+    - autoload.php
+  excludePaths:
+    - autoload.php
+    - coverage
+    - Tests

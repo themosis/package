@@ -6,7 +6,7 @@ namespace Themosis\Cli;
 
 abstract class ColorPalette implements Attribute
 {
-    public function __construct(
+    final public function __construct(
         protected Color $color,
     ) {}
 
