@@ -12,8 +12,11 @@ final class CallbackValidator implements Validator
         private Closure $callback,
     ) {}
 
-    public function validate(?string $value): ?string
+    public function validate(mixed $value): ?string
     {
-        return ($this->callback)($value);
+	/** @var null|string $result */
+	$result = ($this->callback)($value);
+
+	return $result;
     }
 }

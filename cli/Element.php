@@ -6,8 +6,6 @@ namespace Themosis\Cli;
 
 abstract class Element
 {
-    protected mixed $value = null;
-
     public function __construct(
         protected Output $output,
     ) {}
@@ -19,10 +17,10 @@ abstract class Element
         return $this->output;
     }
 
-    public function value(): mixed
-    {
-        return $this->value;
-    }
+    /**
+     * @return null|string|array<mixed>
+     */
+    abstract public function value(): null|string|array;
 
     public function __invoke(): mixed
     {

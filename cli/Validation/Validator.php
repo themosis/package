@@ -6,5 +6,9 @@ namespace Themosis\Cli\Validation;
 
 interface Validator
 {
-    public function validate(?string $value): ?string;
+    /**
+     * @param null|string|array<mixed> $value
+     * @return null|string|array<mixed>
+     */
+    public function validate(null|string|array $value): null|string|array;
 }

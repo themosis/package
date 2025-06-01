@@ -13,6 +13,11 @@ final class Message extends Element
         parent::__construct($output);
     }
 
+    public function value(): null
+    {
+	return null;
+    }
+
     public function render(): static
     {
         $this->output->write($this->sequence->get());

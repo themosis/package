@@ -8,6 +8,11 @@ use RuntimeException;
 
 final class Composable extends Element
 {
+    /**
+     * @var null|string|array<mixed>
+     */
+    protected null|string|array $value;
+    
     /** @var Element[] */
     private array $children = [];
 
@@ -17,6 +22,14 @@ final class Composable extends Element
         parent::__construct(
             output: $element->output(),
         );
+    }
+
+    /**
+     * @return null|string|array<mixed>
+     */
+    public function value(): null|string|array
+    {
+	return $this->value;
     }
 
     public function add(string $name, Element $child): static

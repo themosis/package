@@ -8,6 +8,11 @@ use Closure;
 
 final class Collection extends Element
 {
+    /**
+     * @var array<mixed>
+     */
+    protected array $value = [];
+
     public function __construct(
         private Element $element,
         private Validable $prompt,
@@ -18,6 +23,14 @@ final class Collection extends Element
         );
 
         $this->value = [];
+    }
+
+    /**
+     * @return array<mixed>
+     */
+    public function value(): array
+    {
+	return $this->value;
     }
 
     public function render(): static
