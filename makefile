@@ -4,13 +4,10 @@ COMMAND=php --version
 
 OCI_IMAGE=php-dev
 OCI_ENV=
-OCI_ENV_XDEBUG=--env "XDEBUG_MODE=coverage"
 
 RUN=podman run -it --rm $(OCI_ENV) -v "$$PWD":/app -w /app $(OCI_IMAGE)
 
-PLAYGROUND_FILE=scripts/playground.php
-
-.PHONY: analyze coverage install* php play test update*
+.PHONY: analyze build-oci coverage install* php play test update*
 
 build-oci:
 	podman build -t $(OCI_IMAGE) .
@@ -51,5 +48,5 @@ php:
 	$(RUN) $(COMMAND)
 
 play:
-	$(RUN) php -f $(PLAYGROUND_FILE)
+	$(RUN) php -f scripts/playground.php
 
