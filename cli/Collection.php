@@ -30,7 +30,7 @@ final class Collection extends Element
      */
     public function value(): array
     {
-	return $this->value;
+        return $this->value;
     }
 
     public function render(): static

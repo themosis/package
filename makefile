@@ -44,6 +44,12 @@ coverage:
 analyze:
 	$(RUN) php tools/phpstan/vendor/bin/phpstan analyze -v -c cli/phpstan.neon cli
 
+fix:
+	$(RUN) php tools/phpcs/vendor/bin/phpcbf cli
+
+sniff:
+	$(RUN) php tools/phpcs/vendor/bin/phpcs cli
+
 php:
 	$(RUN) $(COMMAND)
 

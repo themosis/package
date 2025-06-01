@@ -1,0 +1,11 @@
+<?xml version="1.0"?>
+
+<ruleset name="Themosis/Cli">
+    <!-- Files -->
+    <file>./</file>
+    <file>./tests</file>
+
+    <!-- Code Rules -->
+    <rule ref="Themosis"/>
+</ruleset>
+

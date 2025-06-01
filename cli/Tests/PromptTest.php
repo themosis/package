@@ -101,7 +101,12 @@ final class PromptTest extends TestCase
 
         $result = $prompt();
 
-        $this->assertSame("\u{001b}[mPlease insert your name:\u{001b}[mInvalid name, try again!\u{000a}\u{001b}[mPlease insert your name:", $output->output);
+        $this->assertSame(
+	    // phpcs:ignore
+            expected: "\u{001b}[mPlease insert your name:\u{001b}[mInvalid name, try again!\u{000a}\u{001b}[mPlease insert your name:",
+            actual: $output->output
+        );
+
         $this->assertSame('Julien', $result);
     }
 
@@ -169,7 +174,12 @@ final class PromptTest extends TestCase
 
         $result = $prompt();
 
-        $this->assertSame("\u{001b}[mPlease enter an author:\u{000a}\u{001b}[mInsert author's name:\u{001b}[mInsert author's email:\u{001b}[mInvalid email address.\u{000a}\u{001b}[mInsert author's email:", $output->output);
+        $this->assertSame(
+	    // phpcs:ignore
+	    expected: "\u{001b}[mPlease enter an author:\u{000a}\u{001b}[mInsert author's name:\u{001b}[mInsert author's email:\u{001b}[mInvalid email address.\u{000a}\u{001b}[mInsert author's email:",
+            actual: $output->output
+        );
+
         $this->assertSame(['parent' => null, 'name' => 'Jean Pass', 'email' => 'jean@champagne.biz'], $result);
     }
 
@@ -311,10 +321,15 @@ final class PromptTest extends TestCase
             'email' => 'joao@web.pt',
         ], $result[1]);
 
-        $this->assertSame("\u{001b}[mAdd an author:\u{000a}\u{001b}[mEnter author's name:\u{000a}\u{001b}[mEnter author's email:\u{000a}\u{001b}[mWould you like to add an author?(y/n)\u{000a}\u{001b}[mAdd an author:\u{000a}\u{001b}[mEnter author's name:\u{000a}\u{001b}[mEnter author's email:\u{000a}\u{001b}[mWould you like to add an author?(y/n)\u{000a}", $output->output);
+        $this->assertSame(
+	    // phpcs:ignore
+	    expected: "\u{001b}[mAdd an author:\u{000a}\u{001b}[mEnter author's name:\u{000a}\u{001b}[mEnter author's email:\u{000a}\u{001b}[mWould you like to add an author?(y/n)\u{000a}\u{001b}[mAdd an author:\u{000a}\u{001b}[mEnter author's name:\u{000a}\u{001b}[mEnter author's email:\u{000a}\u{001b}[mWould you like to add an author?(y/n)\u{000a}",
+            actual: $output->output
+        );
     }
 }
 
+// phpcs:disable
 final class LocalInMemoryOutput implements Output
 {
     public string $output = '';
@@ -329,10 +344,12 @@ final class LocalInMemoryInput implements Input
 {
     public function __construct(
         private string $text,
-    ) {}
+    ) {
+    }
 
     public function read(): string
     {
         return $this->text;
     }
 }
+// phpcs:enable

@@ -8,7 +8,8 @@ final class Text implements Code
 {
     public function __construct(
         private string $text,
-    ) {}
+    ) {
+    }
 
     public function get(): string
     {

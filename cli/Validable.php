@@ -10,10 +10,10 @@ use Themosis\Cli\Validation\Validator;
 final class Validable extends Element
 {
     /**
-     * @var null|string|array<mixed>  
+     * @var null|string|array<mixed>
      */
     protected null|string|array $value;
-    
+
     public function __construct(
         private Element $element,
         private Validator $validator,
@@ -28,7 +28,7 @@ final class Validable extends Element
      */
     public function value(): null|string|array
     {
-	return $this->value;
+        return $this->value;
     }
 
     public function render(): static

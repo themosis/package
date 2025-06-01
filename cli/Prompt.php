@@ -7,7 +7,7 @@ namespace Themosis\Cli;
 final class Prompt extends Element
 {
     protected string $value;
-    
+
     public function __construct(
         protected Element $element,
         private Input $input,
@@ -17,7 +17,7 @@ final class Prompt extends Element
 
     public function value(): string
     {
-	return $this->value;
+        return $this->value;
     }
 
     public function render(): static

@@ -8,7 +8,8 @@ final class Display implements Attribute
 {
     private function __construct(
         private string $attribute,
-    ) {}
+    ) {
+    }
 
     public static function reset(): self
     {

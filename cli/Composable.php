@@ -12,7 +12,7 @@ final class Composable extends Element
      * @var null|string|array<mixed>
      */
     protected null|string|array $value;
-    
+
     /** @var Element[] */
     private array $children = [];
 
@@ -29,7 +29,7 @@ final class Composable extends Element
      */
     public function value(): null|string|array
     {
-	return $this->value;
+        return $this->value;
     }
 
     public function add(string $name, Element $child): static

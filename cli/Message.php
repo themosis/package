@@ -15,7 +15,7 @@ final class Message extends Element
 
     public function value(): null
     {
-	return null;
+        return null;
     }
 
     public function render(): static

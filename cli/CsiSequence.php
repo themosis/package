@@ -15,7 +15,8 @@ final class CsiSequence implements Code
     private function __construct(
         private string $code,
         private string $lastByte,
-    ) {}
+    ) {
+    }
 
     public static function selectGraphicRendition(): self
     {

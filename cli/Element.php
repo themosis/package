@@ -8,7 +8,8 @@ abstract class Element
 {
     public function __construct(
         protected Output $output,
-    ) {}
+    ) {
+    }
 
     abstract public function render(): static;
 

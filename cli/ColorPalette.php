@@ -8,7 +8,8 @@ abstract class ColorPalette implements Attribute
 {
     final public function __construct(
         protected Color $color,
-    ) {}
+    ) {
+    }
 
     public static function black(): static
     {

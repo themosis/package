@@ -10,12 +10,12 @@ final class PhpStdInput implements Input
 {
     public function read(): string
     {
-	$value = fgets(STDIN);
+        $value = fgets(STDIN);
 
-	if (false === $value) {
+        if (false === $value) {
             throw new InvalidArgumentException('Invalid input content.');
-	}
-	
+        }
+
         return trim($value);
     }
 }
