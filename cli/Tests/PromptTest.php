@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Themosis\Cli\Tests;
 
 use PHPUnit\Framework\Attributes\Test;
+use RuntimeException;
 use Themosis\Cli\Collection;
 use Themosis\Cli\Composable;
 use Themosis\Cli\Input;
@@ -326,6 +327,48 @@ final class PromptTest extends TestCase
 	    expected: "\u{001b}[mAdd an author:\u{000a}\u{001b}[mEnter author's name:\u{000a}\u{001b}[mEnter author's email:\u{000a}\u{001b}[mWould you like to add an author?(y/n)\u{000a}\u{001b}[mAdd an author:\u{000a}\u{001b}[mEnter author's name:\u{000a}\u{001b}[mEnter author's email:\u{000a}\u{001b}[mWould you like to add an author?(y/n)\u{000a}",
             actual: $output->output
         );
+    }
+
+    #[Test]
+    public function itCanThrowException_whenDeclaringParentAdditionalElement_onComposable(): void
+    {
+        $this->expectException(RuntimeException::class);
+
+        $output = new LocalInMemoryOutput();
+
+        (new Composable(
+            element: new Message(
+                sequence: (Sequence::make()->append(new Text("This is a message."))),
+                output: $output,
+            ),
+        ))
+        ->add('parent', new Message(
+            sequence: (Sequence::make()->append(new Text("Message from child element."))),
+            output: $output,
+        ));
+    }
+
+    #[Test]
+    public function itCanThrowException_whenDeclaringChildElement_withSameName_onComposable(): void
+    {
+        $this->expectException(RuntimeException::class);
+
+        $output = new LocalInMemoryOutput();
+
+        (new Composable(
+            element: new Message(
+                sequence: (Sequence::make()->append(new Text("This is a message."))),
+                output: $output,
+            ),
+        ))
+        ->add('name', new Message(
+            sequence: (Sequence::make()->append(new Text("Message from child element."))),
+            output: $output,
+        ))
+        ->add('name', new Message(
+            sequence: (Sequence::make()->append(new Text("Message from another child element."))),
+            output: $output,
+        ));
     }
 }
 

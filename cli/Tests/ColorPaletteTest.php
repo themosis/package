@@ -4,8 +4,10 @@ declare(strict_types=1);
 
 namespace Themosis\Cli\Tests;
 
+use InvalidArgumentException;
 use PHPUnit\Framework\Attributes\Test;
 use Themosis\Cli\BackgroundColor;
+use Themosis\Cli\Color;
 use Themosis\Cli\ForegroundColor;
 
 final class ColorPaletteTest extends TestCase
@@ -21,13 +23,31 @@ final class ColorPaletteTest extends TestCase
     }
 
     #[Test]
+    public function itThrowsAnException_ifColorCode_isOutOfRange(): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+
+        new Color(-25);
+
+        $this->expectException(InvalidArgumentException::class);
+
+        new Color(267);
+    }
+
+    #[Test]
     public function itRenders_baseAndReverseColors(): void
     {
+        $baseColor = Color::base();
+        $this->assertSame('0', $baseColor->value());
+
         $bgBase = BackgroundColor::base();
         $this->assertSame($this->bgExpectation(0), $bgBase->value());
 
         $fgBase = ForegroundColor::base();
         $this->assertSame($this->fgExpectation(0), $fgBase->value());
+
+        $reverseColor = Color::reverse();
+        $this->assertSame('7', $reverseColor->value());
 
         $bgReverse = BackgroundColor::reverse();
         $this->assertSame($this->bgExpectation(7), $bgReverse->value());
