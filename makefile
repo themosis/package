@@ -30,9 +30,9 @@ install-phpcs:
 update-phpcs:
 	$(RUN) composer --working-dir=tools/phpcs update
 
-install &: install-phpunit install-phpstan install-phpcs
+install: install-phpunit install-phpstan install-phpcs
 
-update &: update-phpunit update-phpstan update-phpcs
+update: update-phpunit update-phpstan update-phpcs
 
 test:
 	$(RUN) php tools/phpunit/vendor/bin/phpunit --configuration cli/phpunit.xml
