@@ -1,12 +1,12 @@
 {
-    "name": "vendor_name/package_name",
-    "description": "description",
+    "name": "themosis/package",
+    "description": "PHP package skeleton.",
     "type": "library",
     "license": "GPL-3.0-or-later",
     "authors": [
 	{
-	    "name": "author_name",
-	    "email": "email@domain.tld"
+	    "name": "Julien Lambé",
+	    "email": "julien@themosis.com"
 	}
     ],
     "prefer-stable": true,
