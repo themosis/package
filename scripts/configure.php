@@ -7,8 +7,11 @@ namespace Themosis;
 use Themosis\Cli\AnsiColor;
 use Themosis\Cli\BackgroundColor;
 use Themosis\Cli\Bold;
+use Themosis\Cli\Code;
 use Themosis\Cli\Collection;
 use Themosis\Cli\Composable;
+use Themosis\Cli\CsiSequence;
+use Themosis\Cli\Display;
 use Themosis\Cli\ForegroundColor;
 use Themosis\Cli\LineFeed;
 use Themosis\Cli\Message;
@@ -43,18 +46,18 @@ function json(string $path): \stdClass
     );
 }
 
-function sequenceDefault(string $text): Sequence
+function sequenceDefault(Code $sequence): CsiSequence
 {
-    return (new Sequence())
-        ->add(new Reset())
-        ->add(new ForegroundColor(AnsiColor::reverse()))
-        ->add(new Text($text))
-        ->add(new LineFeed())
-        ->add(new ForegroundColor(AnsiColor::green()))
-        ->add(new Bold())
-        ->add(new Text("> "))
-        ->add(new Reset())
-        ->add(new ForegroundColor(AnsiColor::reverse()));
+    return Sequence::make()
+        ->append(
+            $sequence,
+            new LineFeed(),
+            Sequence::make()
+                ->attributes(ForegroundColor::green(), Display::bold())
+                ->append(new Text("> ")),
+            Sequence::make()
+                ->attribute(Display::reset()),
+        );
 }
 
 function sequenceTitle(string $text): Sequence
@@ -80,98 +83,103 @@ function sequencePredicate(string $text, string $expectation): Sequence
         ->add(new ForegroundColor(AnsiColor::reverse()));
 }
 
-function sequenceError(string $text): Sequence
+function sequenceError(Code $sequence): CsiSequence
 {
-    return (new Sequence())
-        ->add(new ForegroundColor(AnsiColor::red()))
-        ->add(new Text($text))
-        ->add(new LineFeed())
-        ->add(new Reset());
+    return Sequence::make()
+        ->attribute(ForegroundColor::red())
+        ->append(
+            $sequence,
+            new LineFeed(),
+            Sequence::make()->attribute(Display::reset()),
+        );
 }
 
 $output = new PhpStdOutput();
 $input = new PhpStdInput();
 
-$title = " Themosis Package Tool ";
+$title = " Themosis Package Tool";
 
 $introduction = new Message(
-    sequence: (new Sequence())
-        ->add(new BackgroundColor(AnsiColor::cyan()))
-        ->add(new ForegroundColor(AnsiColor::base()))
-        ->add(new Bold())
-        ->add(new Text(str_repeat(" ", strlen($title))))
-        ->add(new LineFeed())
-        ->add(new Text($title))
-        ->add(new LineFeed())
-        ->add(new Text(str_repeat(" ", strlen($title))))
-        ->add(new LineFeed())
-        ->add(new Reset())
-        ->add(new LineFeed()),
+    sequence: Sequence::make()
+        ->attributes(BackgroundColor::cyan(), ForegroundColor::base(), Display::bold())
+        ->append(
+            new Text(str_repeat(" ", strlen($title))),
+            new LineFeed(),
+            new Text($title),
+            new LineFeed(),
+            new Text(str_repeat(" ", strlen($title))),
+            new LineFeed(),
+            Sequence::make()->attribute(Display::reset())->append(new LineFeed())
+        ),
     output: $output,
 );
 
-$vendorName = (new Sequence())
-    ->add(new Bold())
-    ->add(new Text("vendor"))
-    ->add(new Reset())
-    ->add(new ForegroundColor(AnsiColor::reverse()));
+$vendor = Sequence::make()
+    ->attributes(Display::bold())
+    ->append(
+        new Text("vendor"),
+        Sequence::make()->attribute(Display::reset()),
+    );
 
 $vendorPrompt = new Validable(
     element: new Prompt(
         element: new Message(
-            sequence: sequenceDefault("Please insert a {$vendorName} name:"),
+            sequence: sequenceDefault(new Text("Please insert a {$vendor->get()} name:")),
             output: $output,
         ),
         input: $input,
     ),
     validator: new CallbackValidator(function (string $value) {
         if (empty($value)) {
-            $error = sequenceError("A vendor name is required.");
+            $message = "A vendor name is required.";
 
-            throw new InvalidInput((string) $error);
+            throw new InvalidInput($message, sequenceError(new Text($message)));
         }
 
         if (preg_match('/^[a-z0-9]([_.-]?[a-z0-9]+)*$/', $value) !== 1) {
-            $error = sequenceError("A vendor name must be a lowercased alphanumeric string without any special characters.");
+            $message = "A vendor name must be a lowercased alphanumeric string without any special characters.";
 
-            throw new InvalidInput((string) $error);
+            throw new InvalidInput($message, sequenceError(new Text($message)));
         }
 
         return $value;
     }),
 );
 
-$packageName = (new Sequence())
-    ->add(new Bold())
-    ->add(new Text("package"))
-    ->add(new Reset())
-    ->add(new ForegroundColor(AnsiColor::reverse()));
+$package = Sequence::make()
+    ->attributes(Display::bold())
+    ->append(
+        new Text("package"),
+        Sequence::make()
+            ->attribute(Display::reset())
+    );
 
 $packagePrompt = new Validable(
     element: new Prompt(
         element: new Message(
-            sequence: sequenceDefault("Please insert a {$packageName} name:"),
+            sequence: sequenceDefault(new Text("Please insert a {$package->get()} name:")),
             output: $output,
         ),
         input: $input,
     ),
     validator: new CallbackValidator(function (string $value) {
         if (empty($value)) {
-            $error = sequenceError("A package name is required.");
+            $message = "A package name is required.";
 
-            throw new InvalidInput((string) $error);
+            throw new InvalidInput($message, sequenceError(new Text($message)));
         }
 
         if (preg_match('/^[a-z0-9](([_.]|-{1,2})?[a-z0-9]+)*$/', $value) !== 1) {
-            $error = sequenceError("A package name must be a lowercased alphanumeric string without any special characters.");
+            $message = "A package name must be a lowercased alphanumeric string without any special characters.";
 
-            throw new InvalidInput((string) $error);
+            throw new InvalidInput($message, sequenceError(new Text($message)));
         }
 
-        return strtolower($value);
+        return $value;
     }),
 );
 
+/*
 $descriptionName = (new Sequence())
     ->add(new Bold())
     ->add(new Text("description"))
@@ -278,12 +286,16 @@ $authorsPrompt = new Collection(
         return 'y' === $value;
     },
 );
+ */
 
 $introduction();
 
 $vendor = $vendorPrompt();
 $package = $packagePrompt();
+
+/*
 $description = $descriptionPrompt();
 $authors = $authorsPrompt();
 
 var_dump($vendor, $package, $description, $authors);
+*/

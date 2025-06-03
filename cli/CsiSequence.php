@@ -26,9 +26,18 @@ final class CsiSequence implements Code
         );
     }
 
-    public function append(Code $sequence): static
+    public function append(Code ...$sequences): static
     {
-        $this->children[] = $sequence;
+        foreach ($sequences as $sequence) {
+            $this->children[] = $sequence;
+        }
+
+        return $this;
+    }
+
+    public function attributes(Attribute ...$attributes): static
+    {
+        array_map($this->attribute(...), $attributes);
 
         return $this;
     }

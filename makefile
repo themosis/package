@@ -5,7 +5,7 @@ COMMAND=php --version
 OCI_IMAGE=php-dev
 OCI_ENV=
 
-RUN=podman run -it --rm $(OCI_ENV) -v "$$PWD":/app -w /app $(OCI_IMAGE)
+RUN=podman run -it --rm $(OCI_ENV) -v "$$PWD":/package -w /package $(OCI_IMAGE)
 
 .PHONY: analyze build-oci coverage install* php play test update*
 
