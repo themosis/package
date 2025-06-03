@@ -35,13 +35,18 @@ function path(?string $path = null): string
     return $path ? rootPath() . DIRECTORY_SEPARATOR . trim($path, '\/') : rootPath();
 }
 
-function json(string $path): \stdClass
+function json(string $path): array
 {
     return \json_decode(
         json: \file_get_contents($path),
-        associative: false,
+        associative: true,
         flags: JSON_THROW_ON_ERROR,
     );
+}
+
+function jsonSave(string $path, string $json): void
+{
+    \file_put_contents($path, $json);
 }
 
 function sequenceDefault(Code $sequence): CsiSequence
@@ -302,7 +307,19 @@ try {
     $description = $descriptionPrompt();
     $authors = $authorsPrompt();
 
-    var_dump($vendor, $package, $description, $authors);
+    $composer = json(path('composer.json'));
+    $composer['name'] = sprintf('%s/%s', $vendor, $package);
+    $composer['description'] = $description;
+    $composer['authors'] = array_map(function (array $author) {
+        return [
+            'name' => $author['name'],
+            'email' => $author['email'],
+        ];
+    }, $authors);
+
+    unset($composer['scripts']['post-create-project-cmd']);
+
+    jsonSave(path('composer.json'), \json_encode($composer, JSON_UNESCAPED_SLASHES|JSON_PRETTY_PRINT));
 } catch (Throwable $exception) {
     $output->write(
         Sequence::make()
