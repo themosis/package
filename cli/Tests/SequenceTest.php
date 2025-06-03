@@ -37,8 +37,7 @@ final class SequenceTest extends TestCase
     public function itRenders_textWithForeground_andBackgroundColors(): void
     {
         $sequence = Sequence::make()
-            ->attribute(BackgroundColor::red())
-            ->attribute(ForegroundColor::yellow())
+            ->attributes(BackgroundColor::red(), ForegroundColor::yellow())
             ->append(new Text($text = "This text has a red background and a yellow foreground"))
             ->append(new LineFeed())
             ->append(Sequence::make()->attribute(Display::reset()));

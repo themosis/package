@@ -4,9 +4,7 @@ declare(strict_types=1);
 
 namespace Themosis;
 
-use Themosis\Cli\AnsiColor;
 use Themosis\Cli\BackgroundColor;
-use Themosis\Cli\Bold;
 use Themosis\Cli\Code;
 use Themosis\Cli\Collection;
 use Themosis\Cli\Composable;
@@ -18,12 +16,12 @@ use Themosis\Cli\Message;
 use Themosis\Cli\PhpStdInput;
 use Themosis\Cli\PhpStdOutput;
 use Themosis\Cli\Prompt;
-use Themosis\Cli\Reset;
 use Themosis\Cli\Sequence;
 use Themosis\Cli\Text;
 use Themosis\Cli\Validable;
 use Themosis\Cli\Validation\CallbackValidator;
 use Themosis\Cli\Validation\InvalidInput;
+use Throwable;
 
 require dirname(__DIR__) . '/cli/autoload.php';
 
@@ -60,27 +58,23 @@ function sequenceDefault(Code $sequence): CsiSequence
         );
 }
 
-function sequenceTitle(string $text): Sequence
+function sequencePredicate(Code $text, Code $expectation): CsiSequence
 {
-    return (new Sequence())
-        ->add(new Text($text))
-        ->add(new LineFeed())
-        ->add(new Reset());
-}
-
-function sequencePredicate(string $text, string $expectation): Sequence
-{
-    return (new Sequence())
-        ->add(new Reset())
-        ->add(new Text($text))
-        ->add(new ForegroundColor(AnsiColor::yellow()))
-        ->add(new Text($expectation))
-        ->add(new LineFeed())
-        ->add(new ForegroundColor(AnsiColor::green()))
-        ->add(new Bold())
-        ->add(new Text("> "))
-        ->add(new Reset())
-        ->add(new ForegroundColor(AnsiColor::reverse()));
+    return Sequence::make()
+        ->append(
+            $text,
+            Sequence::make()
+                ->attribute(ForegroundColor::yellow())
+                ->append($expectation),
+            Sequence::make()
+                ->attribute(Display::reset())
+                ->append(new LineFeed()),
+            Sequence::make()
+                ->attributes(ForegroundColor::green(), Display::bold())
+                ->append(new Text("> ")),
+            Sequence::make()
+                ->attribute(Display::reset()),
+        );
 }
 
 function sequenceError(Code $sequence): CsiSequence
@@ -97,7 +91,7 @@ function sequenceError(Code $sequence): CsiSequence
 $output = new PhpStdOutput();
 $input = new PhpStdInput();
 
-$title = " Themosis Package Tool";
+$title = " Themosis Package Tool ";
 
 $introduction = new Message(
     sequence: Sequence::make()
@@ -109,13 +103,20 @@ $introduction = new Message(
             new LineFeed(),
             new Text(str_repeat(" ", strlen($title))),
             new LineFeed(),
-            Sequence::make()->attribute(Display::reset())->append(new LineFeed())
+            Sequence::make()
+                ->attribute(Display::reset())
+                ->append(
+                    new LineFeed(),
+                    new Text("This tool will guide you through setting up your PHP package."),
+                    new LineFeed(),
+                    new LineFeed(),
+                ),
         ),
     output: $output,
 );
 
 $vendor = Sequence::make()
-    ->attributes(Display::bold())
+    ->attribute(Display::bold())
     ->append(
         new Text("vendor"),
         Sequence::make()->attribute(Display::reset()),
@@ -124,7 +125,7 @@ $vendor = Sequence::make()
 $vendorPrompt = new Validable(
     element: new Prompt(
         element: new Message(
-            sequence: sequenceDefault(new Text("Please insert a {$vendor->get()} name:")),
+            sequence: sequenceDefault(new Text("Please insert a {$vendor} name:")),
             output: $output,
         ),
         input: $input,
@@ -147,7 +148,7 @@ $vendorPrompt = new Validable(
 );
 
 $package = Sequence::make()
-    ->attributes(Display::bold())
+    ->attribute(Display::bold())
     ->append(
         new Text("package"),
         Sequence::make()
@@ -157,7 +158,7 @@ $package = Sequence::make()
 $packagePrompt = new Validable(
     element: new Prompt(
         element: new Message(
-            sequence: sequenceDefault(new Text("Please insert a {$package->get()} name:")),
+            sequence: sequenceDefault(new Text("Please insert a {$package} name:")),
             output: $output,
         ),
         input: $input,
@@ -179,63 +180,69 @@ $packagePrompt = new Validable(
     }),
 );
 
-/*
-$descriptionName = (new Sequence())
-    ->add(new Bold())
-    ->add(new Text("description"))
-    ->add(new Reset())
-    ->add(new ForegroundColor(AnsiColor::reverse()));
+$description = Sequence::make()
+    ->attribute(Display::bold())
+    ->append(
+        new Text("description"),
+        Sequence::make()->attribute(Display::reset())
+    );
 
 $descriptionPrompt = new Validable(
     element: new Prompt(
         element: new Message(
-            sequence: sequenceDefault("Please insert a {$descriptionName}:"),
+            sequence: sequenceDefault(new Text("Please insert a {$description}:")),
             output: $output,
         ),
         input: $input,
     ),
     validator: new CallbackValidator(function (string $value) {
         if (empty($value)) {
-            $error = sequenceError("A description is required.");
+            $message = "A description is required.";
 
-            throw new InvalidInput((string) $error);
+            throw new InvalidInput($message, sequenceError(new Text($message)));
         }
 
         return $value;
     }),
 );
 
-$authorName = (new Sequence())
-    ->add(new Bold())
-    ->add(new Text("name"))
-    ->add(new Reset())
-    ->add(new ForegroundColor(AnsiColor::reverse()));
+$authorName = Sequence::make()
+    ->attribute(Display::bold())
+    ->append(
+        new Text("name"),
+        Sequence::make()->attribute(Display::reset())
+    );
 
-$authorEmail = (new Sequence())
-    ->add(new Bold())
-    ->add(new Text("email"))
-    ->add(new Reset())
-    ->add(new ForegroundColor(AnsiColor::reverse()));
+$authorEmail = Sequence::make()
+    ->attribute(Display::bold())
+    ->append(
+        new Text("email"),
+        Sequence::make()->attribute(Display::reset())
+    );
 
 $authorsPrompt = new Collection(
     element: (new Composable(
         element: new Message(
-            sequence: sequenceTitle("Please insert an author."),
+            sequence: Sequence::make()
+                ->append(
+                    new Text("Please insert an author."),
+                    new LineFeed(),
+                ),
             output: $output,
         ),
     ))->add('name', new Validable(
         element: new Prompt(
             element: new Message(
-                sequence: sequenceDefault("Enter author's {$authorName}:"),
+                sequence: sequenceDefault(new Text("Enter author's {$authorName}:")),
                 output: $output,
             ),
             input: $input,
         ),
         validator: new CallbackValidator(function (string $name) {
             if (empty($name)) {
-                $error = sequenceError("An author's name is required.");
+                $message = "An author's name is required.";
 
-                throw new InvalidInput((string) $error);
+                throw new InvalidInput($message, sequenceError(new Text($message)));
             }
 
             return $name;
@@ -243,22 +250,22 @@ $authorsPrompt = new Collection(
     ))->add('email', new Validable(
         element: new Prompt(
             element: new Message(
-                sequence: sequenceDefault("Enter author's {$authorEmail}:"),
+                sequence: sequenceDefault(new Text("Enter author's {$authorEmail}:")),
                 output: $output,
             ),
             input: $input,
         ),
         validator: new CallbackValidator(function (string $email) {
             if (empty($email)) {
-                $error = sequenceError("An author's email is required.");
+                $message = "An author's email is required.";
 
-                throw new InvalidInput((string) $error);
+                throw new InvalidInput($message, sequenceError(new Text($message)));
             }
 
             if (false === filter_var($email, FILTER_VALIDATE_EMAIL)) {
-                $error = sequenceError("Invalid email address.");
+                $message = "Invalid email address.";
 
-                throw new InvalidInput((string) $error);
+                throw new InvalidInput($message, sequenceError(new Text($message)));
             }
 
             return $email;
@@ -267,16 +274,16 @@ $authorsPrompt = new Collection(
     prompt: new Validable(
         element: new Prompt(
             element: new Message(
-                sequence: sequencePredicate("Would you like to add another author?", "(y/n)"),
+                sequence: sequencePredicate(new Text("Would you like to add another author?"), new Text("(y/n)")),
                 output: $output,
             ),
             input: $input,
         ),
         validator: new CallbackValidator(function (string $value) {
             if (! in_array($value, ['y', 'Y', 'n', 'N'], true)) {
-                $error = sequenceError(sprintf('Answer "%s" or "%s"', 'y', 'n'));
+                $message = sprintf('Answer "%s" or "%s"', 'y', 'n');
 
-                throw new InvalidInput((string) $error);
+                throw new InvalidInput($message, sequenceError(new Text($message)));
             }
 
             return strtolower($value);
@@ -286,16 +293,29 @@ $authorsPrompt = new Collection(
         return 'y' === $value;
     },
 );
- */
 
-$introduction();
+try {
+    $introduction();
 
-$vendor = $vendorPrompt();
-$package = $packagePrompt();
+    $vendor = $vendorPrompt();
+    $package = $packagePrompt();
+    $description = $descriptionPrompt();
+    $authors = $authorsPrompt();
 
-/*
-$description = $descriptionPrompt();
-$authors = $authorsPrompt();
-
-var_dump($vendor, $package, $description, $authors);
-*/
+    var_dump($vendor, $package, $description, $authors);
+} catch (Throwable $exception) {
+    $output->write(
+        Sequence::make()
+            ->attribute(ForegroundColor::red())
+            ->append(
+                new LineFeed(),
+                new Text($exception->getMessage()),
+                new LineFeed(),
+                Sequence::make()
+                    ->attribute(Display::reset()),
+            )
+            ->get()
+    );
+} finally {
+    return 0;
+}
