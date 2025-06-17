@@ -10,8 +10,10 @@ use Themosis\Cli\PhpStdOutput;
 use Themosis\Cli\Prompt;
 use Themosis\Cli\Sequence;
 use Themosis\Cli\Text;
+use Themosis\Components\Package\Configurator\Prompts\TerminalComponentFactory;
+use Themosis\Components\Package\Configurator\Stages\IntroductionStage;
 
-require './cli/autoload.php';
+require 'vendor/autoload.php';
 
 $sequence = Sequence::make()
     ->attribute(BackgroundColor::blue())
@@ -55,3 +57,12 @@ $output->write(Sequence::make()
         ->append(new Text($result)))
     ->append(Sequence::make()->attribute(Display::reset())
         ->append(new LineFeed())));
+
+$intro = new IntroductionStage(
+    factory: new TerminalComponentFactory(
+        output: $output,
+        input: new PhpStdInput(),
+    )
+);
+
+$intro->run();

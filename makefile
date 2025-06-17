@@ -35,11 +35,11 @@ install: install-phpunit install-phpstan install-phpcs
 update: update-phpunit update-phpstan update-phpcs
 
 test:
-	$(RUN) php tools/phpunit/vendor/bin/phpunit --configuration cli/phpunit.xml
+	$(RUN) php tools/phpunit/vendor/bin/phpunit --configuration phpunit.dev.xml
 
 coverage: OCI_ENV=--env "XDEBUG_MODE=coverage"
 coverage:
-	$(RUN) php tools/phpunit/vendor/bin/phpunit --configuration cli/phpunit.xml --coverage-html cli/coverage/html
+	$(RUN) php tools/phpunit/vendor/bin/phpunit --configuration phpunit.dev.xml --coverage-html ./coverage/html
 
 analyze:
 	$(RUN) php tools/phpstan/vendor/bin/phpstan analyze -v -c cli/phpstan.neon cli

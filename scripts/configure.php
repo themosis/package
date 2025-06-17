@@ -23,7 +23,7 @@ use Themosis\Cli\Validation\CallbackValidator;
 use Themosis\Cli\Validation\InvalidInput;
 use Throwable;
 
-require dirname(__DIR__) . '/cli/autoload.php';
+require_once dirname(__DIR__) . '/vendor/autoload.php';
 
 function rootPath(): string
 {
@@ -317,9 +317,23 @@ try {
         ];
     }, $authors);
 
-    unset($composer['scripts']['post-create-project-cmd']);
+    if (isset($composer['scripts']['post-create-project-cmd'])) {
+        //unset($composer['scripts']['post-create-project-cmd']);
+    }
 
-    jsonSave(path('composer.json'), \json_encode($composer, JSON_UNESCAPED_SLASHES|JSON_PRETTY_PRINT));
+    //jsonSave(path('composer.json'), \json_encode($composer, JSON_UNESCAPED_SLASHES | JSON_PRETTY_PRINT));
+    $output->write(
+        Sequence::make()
+            ->attributes(ForegroundColor::green(), Display::bold())
+            ->append(
+                new LineFeed(),
+                new Text("Package is ready!"),
+                new LineFeed(),
+                Sequence::make()
+                    ->attribute(Display::reset())
+            )
+            ->get()
+    );
 } catch (Throwable $exception) {
     $output->write(
         Sequence::make()

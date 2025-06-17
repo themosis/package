@@ -15,7 +15,7 @@ final class CallbackValidator implements Validator
 
     public function validate(mixed $value): ?string
     {
-    /** @var null|string $result */
+        /** @var null|string $result */
         $result = ($this->callback)($value);
 
         return $result;

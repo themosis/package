@@ -12,23 +12,25 @@
     "prefer-stable": true,
     "minimum-stability": "stable",
     "autoload": {
-	"psr-4": {}
+	"psr-4": {
+	    "Themosis\\Cli\\": "cli/",
+	    "Themosis\\Components\\Package\\Configurator\\": "configurator/"
+	}
     },
     "autoload-dev": {
 	"psr-4": {}
     },
     "repositories": [],
     "require": {
-	"php": "^8.2"
+	"php": "^8.2",
+	"themosis/filesystem": "dev-main"
     },
     "scripts": {
         "test": "tools/phpunit/vendor/bin/phpunit",
 	"coverage": "XDEBUG_MODE=coverage tools/phpunit/vendor/bin/phpunit --coverage-html coverage/html",
         "fix": "tools/phpcs/vendor/bin/phpcbf",
         "sniff": "tools/phpcs/vendor/bin/phpcs",
-        "analyze": "tools/phpstan/vendor/bin/phpstan analyze",
-	"post-create-project-cmd": [
-	    "@php -f scripts/configure.php"
-	]
+        "analyze": "tools/phpstan/vendor/bin/phpstan analyze"
+
     }
 }
