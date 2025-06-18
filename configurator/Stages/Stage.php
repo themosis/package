@@ -10,5 +10,5 @@ interface Stage
 {
     public function run(): void;
 
-    public function componentChanged(Component $component): void;
+    public function componentChanged(Component &$component): void;
 }

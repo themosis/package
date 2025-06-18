@@ -5,22 +5,21 @@ declare(strict_types=1);
 namespace Themosis\Cli\Validation;
 
 use RuntimeException;
-use Themosis\Cli\Code;
 use Throwable;
 
 final class InvalidInput extends RuntimeException
 {
-    private Code $sequence;
+    private FormattedText $formattedText;
 
-    public function __construct(string $message, Code $sequence, ?Throwable $previous = null)
+    public function __construct(string $message, FormattedText $formattedText, ?Throwable $previous = null)
     {
         parent::__construct($message, 1, $previous);
 
-        $this->sequence = $sequence;
+        $this->formattedText = $formattedText;
     }
 
-    public function getSequence(): Code
+    public function getFormattedText(): FormattedText
     {
-        return $this->sequence;
+        return $this->formattedText;
     }
 }

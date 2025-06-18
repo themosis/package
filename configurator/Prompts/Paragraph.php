@@ -29,6 +29,7 @@ final class Paragraph extends Component
                     new LineFeed(),
                     new Text($text),
                     new LineFeed(),
+                    new LineFeed(),
                     Sequence::make()
                         ->attribute(Display::reset()),
                 ),
@@ -40,9 +41,7 @@ final class Paragraph extends Component
     {
         $this->element->render();
 
-        if ($this->director) {
-            $this->director->componentChanged($this);
-        }
+        $this->notify();
 
         return $this;
     }

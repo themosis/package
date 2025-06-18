@@ -11,7 +11,7 @@ use Themosis\Cli\Prompt;
 use Themosis\Cli\Sequence;
 use Themosis\Cli\Text;
 use Themosis\Components\Package\Configurator\Prompts\TerminalComponentFactory;
-use Themosis\Components\Package\Configurator\Stages\IntroductionStage;
+use Themosis\Components\Package\Configurator\Stages\InitStage;
 
 require 'vendor/autoload.php';
 
@@ -58,7 +58,7 @@ $output->write(Sequence::make()
     ->append(Sequence::make()->attribute(Display::reset())
         ->append(new LineFeed())));
 
-$intro = new IntroductionStage(
+$intro = new InitStage(
     factory: new TerminalComponentFactory(
         output: $output,
         input: new PhpStdInput(),

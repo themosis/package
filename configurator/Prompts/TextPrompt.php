@@ -52,6 +52,8 @@ final class TextPrompt extends Component
     {
         $this->element->render();
 
+        $this->notify();
+
         return $this;
     }
 

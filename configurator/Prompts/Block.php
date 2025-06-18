@@ -55,9 +55,7 @@ final class Block extends Component
     {
         $this->element->render();
 
-        if ($this->director) {
-            $this->director->componentChanged($this);
-        }
+        $this->notify();
 
         return $this;
     }

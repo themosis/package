@@ -16,4 +16,11 @@ abstract class Component
         
         return $this;
     }
+
+    protected function notify(): void
+    {
+        if ($this->director) {
+            $this->director->componentChanged($this);
+        }
+    }
 }
