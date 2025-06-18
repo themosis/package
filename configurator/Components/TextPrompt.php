@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Themosis\Components\Package\Configurator\Prompts;
+namespace Themosis\Components\Package\Configurator\Components;
 
 use Themosis\Cli\Display;
 use Themosis\Cli\Element;
@@ -32,6 +32,7 @@ final class TextPrompt extends Component
                 element: new Message(
                     sequence: Sequence::make()
                         ->append(
+                            new LineFeed(),
                             new Text($message),
                             new LineFeed(),
                             Sequence::make()

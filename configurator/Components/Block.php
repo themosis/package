@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Themosis\Components\Package\Configurator\Prompts;
+namespace Themosis\Components\Package\Configurator\Components;
 
 use Themosis\Cli\Attribute;
 use Themosis\Cli\BackgroundColor;
@@ -24,7 +24,8 @@ final class Block extends Component
         private string $text,
         Attribute ...$attributes,
     ) {
-        $emptySpace = str_repeat(" ", strlen($text));
+        $text = ' ' . trim($text) . ' ';
+        $emptySpace = str_repeat(' ', strlen($text));
 
         if (empty($attributes)) {
             $attributes = [

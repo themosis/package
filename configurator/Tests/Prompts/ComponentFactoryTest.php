@@ -8,7 +8,7 @@ use PHPUnit\Framework\Attributes\Test;
 use Themosis\Cli\Input;
 use Themosis\Cli\Output;
 use Themosis\Cli\Validation\CallbackValidator;
-use Themosis\Components\Package\Configurator\Prompts\TerminalComponentFactory;
+use Themosis\Components\Package\Configurator\Components\TerminalComponentFactory;
 use Themosis\Components\Package\Configurator\Tests\TestCase;
 
 final class ComponentFactoryTest extends TestCase

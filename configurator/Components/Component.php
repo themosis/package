@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Themosis\Components\Package\Configurator\Prompts;
+namespace Themosis\Components\Package\Configurator\Components;
 
 use Themosis\Components\Package\Configurator\Stages\Stage;
 

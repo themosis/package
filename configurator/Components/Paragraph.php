@@ -2,7 +2,7 @@
 
 declare(strict_types=1);
 
-namespace Themosis\Components\Package\Configurator\Prompts;
+namespace Themosis\Components\Package\Configurator\Components;
 
 use Themosis\Cli\Attribute;
 use Themosis\Cli\Display;
@@ -28,7 +28,6 @@ final class Paragraph extends Component
                 ->append(
                     new LineFeed(),
                     new Text($text),
-                    new LineFeed(),
                     new LineFeed(),
                     Sequence::make()
                         ->attribute(Display::reset()),

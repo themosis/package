@@ -17,6 +17,7 @@ use Themosis\Cli\Sequence;
 use Themosis\Cli\Text;
 use Themosis\Cli\Validable;
 use Themosis\Cli\Validation\CallbackValidator;
+use Themosis\Cli\Validation\FormattedText;
 use Themosis\Cli\Validation\InvalidInput;
 
 final class PromptTest extends TestCase
@@ -78,11 +79,9 @@ final class PromptTest extends TestCase
                 if (empty($texts[$iteration])) {
                     $iteration++;
 
-                    $errorSequence = Sequence::make()
-                        ->append($text = new Text("Invalid name, try again!"))
-                        ->append(new LineFeed());
+                    $text = "Invalid name, try again!";
 
-                    throw new InvalidInput((string) $text, $errorSequence);
+                    throw new InvalidInput($text, FormattedText::error($text));
                 }
 
                 return $texts[$iteration];
@@ -104,7 +103,7 @@ final class PromptTest extends TestCase
 
         $this->assertSame(
 	    // phpcs:ignore
-            expected: "\u{001b}[mPlease insert your name:\u{001b}[mInvalid name, try again!\u{000a}\u{001b}[mPlease insert your name:",
+            expected: "\u{001b}[mPlease insert your name:\u{001b}[38;5;1m\u{000a}Invalid name, try again!\u{000a}\u{000a}\u{001b}[0m\u{001b}[mPlease insert your name:",
             actual: $output->output
         );
 
@@ -135,11 +134,9 @@ final class PromptTest extends TestCase
             ),
             validator: new CallbackValidator(function (string $value) {
                 if (empty($value)) {
-                    $errorSequence = Sequence::make()
-                        ->append($text = new Text("Author's name is required."))
-                        ->append(new LineFeed());
+                    $text = "Author's name is required.";
 
-                    throw new InvalidInput((string) $text, $errorSequence);
+                    throw new InvalidInput($text, FormattedText::error($text));
                 }
 
                 return $value;
@@ -162,11 +159,9 @@ final class PromptTest extends TestCase
                 if (false === filter_var($value, FILTER_VALIDATE_EMAIL)) {
                     $iteration++;
 
-                    $errorSequence = Sequence::make()
-                        ->append($text = new Text("Invalid email address."))
-                        ->append(new LineFeed());
+                    $text = "Invalid email address.";
 
-                    throw new InvalidInput((string) $text, $errorSequence);
+                    throw new InvalidInput($text, FormattedText::error($text));
                 }
 
                 return $value;
@@ -177,7 +172,7 @@ final class PromptTest extends TestCase
 
         $this->assertSame(
 	    // phpcs:ignore
-	    expected: "\u{001b}[mPlease enter an author:\u{000a}\u{001b}[mInsert author's name:\u{001b}[mInsert author's email:\u{001b}[mInvalid email address.\u{000a}\u{001b}[mInsert author's email:",
+	        expected: "\u{001b}[mPlease enter an author:\u{000a}\u{001b}[mInsert author's name:\u{001b}[mInsert author's email:\u{001b}[38;5;1m\u{000a}Invalid email address.\u{000a}\u{000a}\u{001b}[0m\u{001b}[mInsert author's email:",
             actual: $output->output
         );
 
@@ -214,11 +209,9 @@ final class PromptTest extends TestCase
                 ),
                 validator: new CallbackValidator(function (string $value) {
                     if (! in_array($value, ['y', 'n'])) {
-                        $errorSequence = Sequence::make()
-                            ->append($text = new Text("Enter either y or n."))
-                            ->append(new LineFeed());
+                        $text = "Enter either y or n.";
 
-                        throw new InvalidInput((string) $text, $errorSequence);
+                        throw new InvalidInput($text, FormattedText::error($text));
                     }
 
                     return $value;
