@@ -5,7 +5,6 @@ declare(strict_types=1);
 namespace Themosis\Components\Package\Configurator\Components;
 
 use Themosis\Cli\Display;
-use Themosis\Cli\Element;
 use Themosis\Cli\ForegroundColor;
 use Themosis\Cli\Input;
 use Themosis\Cli\LineFeed;
@@ -19,8 +18,6 @@ use Themosis\Cli\Validation\Validator;
 
 final class TextPrompt extends Component
 {
-    private Element $element;
-
     public function __construct(
         Output $output,
         Input $input,

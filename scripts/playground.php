@@ -10,7 +10,7 @@ use Themosis\Cli\PhpStdOutput;
 use Themosis\Cli\Prompt;
 use Themosis\Cli\Sequence;
 use Themosis\Cli\Text;
-use Themosis\Components\Package\Configurator\Prompts\TerminalComponentFactory;
+use Themosis\Components\Package\Configurator\Components\TerminalComponentFactory;
 use Themosis\Components\Package\Configurator\Stages\InitStage;
 
 require 'vendor/autoload.php';

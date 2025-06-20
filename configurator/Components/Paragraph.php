@@ -6,7 +6,6 @@ namespace Themosis\Components\Package\Configurator\Components;
 
 use Themosis\Cli\Attribute;
 use Themosis\Cli\Display;
-use Themosis\Cli\Element;
 use Themosis\Cli\LineFeed;
 use Themosis\Cli\Message;
 use Themosis\Cli\Output;
@@ -15,8 +14,6 @@ use Themosis\Cli\Text;
 
 final class Paragraph extends Component
 {
-    private Element $element;
-
     public function __construct(
         private Output $output,
         private string $text,

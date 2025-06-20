@@ -15,7 +15,8 @@ final class FormattedText implements Stringable
 {
     private function __construct(
         private string $text,
-    ) {}
+    ) {
+    }
 
     public static function error(string $text): self
     {
@@ -25,7 +26,6 @@ final class FormattedText implements Stringable
                 ->append(
                     new LineFeed(),
                     new Text($text),
-                    new LineFeed(),
                     new LineFeed(),
                     Sequence::make()->attribute(Display::reset()),
                 )

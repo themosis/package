@@ -10,6 +10,7 @@ use Themosis\Cli\Validation\InvalidInput;
 use Themosis\Components\Package\Configurator\Components\Block;
 use Themosis\Components\Package\Configurator\Components\Component;
 use Themosis\Components\Package\Configurator\Components\ComponentFactory;
+use Themosis\Components\Package\Configurator\Components\MultiPrompt;
 use Themosis\Components\Package\Configurator\Components\Paragraph;
 use Themosis\Components\Package\Configurator\Components\TextPrompt;
 
@@ -24,6 +25,8 @@ final class InitStage implements Stage
     private TextPrompt $package;
 
     private TextPrompt $description;
+
+    private MultiPrompt $authors;
 
     private array $state = [];
 
@@ -85,6 +88,48 @@ final class InitStage implements Stage
                 return $value;
             }))
             ->withDirector($this);
+
+        $this->authors = $factory
+            ->multiPrompt(
+                message: $factory->paragraph('Please insert an author.'),
+                more: $factory->textPrompt('Would you like to add another author?[y/n]', new CallbackValidator(function (string $value) {
+                    if (! in_array($value, ['y', 'Y', 'n', 'N'], true)) {
+                        $message = sprintf('Answer "%s" or "%s"', 'y', 'n');
+
+                        throw new InvalidInput($message, FormattedText::error($message));
+                    }
+
+                    return strtolower($value);
+                })),
+                predicate: function (string $value) {
+                    return 'y' === $value;
+                },
+            )
+            ->add('name', $factory->textPrompt('Enter author\'s name:', new CallbackValidator(function (string $value) {
+                if (empty($value)) {
+                    $message = "An author's name is required.";
+
+                    throw new InvalidInput($message, FormattedText::error($message));
+                }
+
+                return $value;
+            })))
+            ->add('email', $factory->textPrompt('Enter author\'s email:', new CallbackValidator(function (string $value) {
+                if (empty($value)) {
+                    $message = "An author's email is required.";
+
+                    throw new InvalidInput($message, FormattedText::error($message));
+                }
+
+                if (false === filter_var($value, FILTER_VALIDATE_EMAIL)) {
+                    $message = "Invalid email address.";
+
+                    throw new InvalidInput($message, FormattedText::error($message));
+                }
+
+                return $value;
+            })))
+            ->withDirector($this);
     }
 
     public function run(): void
@@ -94,6 +139,7 @@ final class InitStage implements Stage
         $this->vendor->render();
         $this->package->render();
         $this->description->render();
+        $this->authors->render();
     }
 
     public function componentChanged(Component &$component): void
@@ -108,6 +154,10 @@ final class InitStage implements Stage
 
         if ($component === $this->description && $component instanceof TextPrompt) {
             $this->state['description'] = $component->value();
+        }
+
+        if ($component === $this->authors && $component instanceof MultiPrompt) {
+            $this->state['authors'] = $component->value();
         }
     }
 }

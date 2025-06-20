@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace Themosis\Components\Package\Configurator\Components;
 
+use Closure;
 use Themosis\Cli\Attribute;
 use Themosis\Cli\Input;
 use Themosis\Cli\Output;
@@ -49,6 +50,15 @@ final class TerminalComponentFactory implements ComponentFactory
             input: $this->input,
             message: $message,
             validator: $validator,
+        );
+    }
+
+    public function multiPrompt(Paragraph $message, TextPrompt $more, Closure $predicate): MultiPrompt
+    {
+        return new MultiPrompt(
+            message: $message,
+            more: $more,
+            predicate: $predicate,
         );
     }
 }
