@@ -40,7 +40,7 @@ final class Paragraph extends Component
         );
     }
 
-    public function add(string $text): static
+    public function addText(string $text): static
     {
         $this
             ->sequence

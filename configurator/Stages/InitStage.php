@@ -38,7 +38,8 @@ final class InitStage implements Stage
             ->withDirector($this);
 
         $this->introduction = $factory
-            ->paragraph('This tool will guide you through setting up your PHP package or application.')
+            ->paragraph('The Themosis Package tool will guide you to setup your PHP package or application.')
+            ->addText('The following steps will help you configure your "composer.json" file:')
             ->withDirector($this);
 
         $this->vendor = $factory
