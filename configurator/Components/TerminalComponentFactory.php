@@ -34,6 +34,15 @@ final class TerminalComponentFactory implements ComponentFactory
         );
     }
 
+    public function title(string $text, Attribute ...$attributes): Title
+    {
+        return new Title(
+            $this->output,
+            $text,
+            ...$attributes,
+        );
+    }
+
     public function paragraph(string $text, Attribute ...$attributes): Paragraph
     {
         return new Paragraph(
