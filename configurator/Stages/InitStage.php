@@ -4,22 +4,20 @@ declare(strict_types=1);
 
 namespace Themosis\Components\Package\Configurator\Stages;
 
+use Themosis\Cli\Display;
+use Themosis\Cli\ForegroundColor;
+use Themosis\Cli\Sequence;
+use Themosis\Cli\Text;
 use Themosis\Cli\Validation\CallbackValidator;
 use Themosis\Cli\Validation\FormattedText;
 use Themosis\Cli\Validation\InvalidInput;
-use Themosis\Components\Package\Configurator\Components\Block;
 use Themosis\Components\Package\Configurator\Components\Component;
 use Themosis\Components\Package\Configurator\Components\ComponentFactory;
 use Themosis\Components\Package\Configurator\Components\MultiPrompt;
-use Themosis\Components\Package\Configurator\Components\Paragraph;
 use Themosis\Components\Package\Configurator\Components\TextPrompt;
 
 final class InitStage implements Stage
 {
-    private Block $title;
-
-    private Paragraph $introduction;
-
     private TextPrompt $vendor;
 
     private TextPrompt $package;
@@ -33,15 +31,6 @@ final class InitStage implements Stage
     public function __construct(
         private ComponentFactory $factory,
     ) {
-        $this->title = $factory
-            ->block('Themosis Package')
-            ->withDirector($this);
-
-        $this->introduction = $factory
-            ->paragraph('The Themosis Package tool will guide you to setup your PHP package or application.')
-            ->addText('The following steps will help you configure your "composer.json" file:')
-            ->withDirector($this);
-
         $this->vendor = $factory
             ->textPrompt('Please insert a vendor name:', new CallbackValidator(function (string $value) {
                 if (empty($value)) {
@@ -90,10 +79,14 @@ final class InitStage implements Stage
             }))
             ->withDirector($this);
 
+        $option = Sequence::make()
+            ->attributes(ForegroundColor::yellow())
+            ->append(new Text('[y/n]'));
+
         $this->authors = $factory
             ->multiPrompt(
                 message: $factory->paragraph('Please insert an author.'),
-                more: $factory->textPrompt('Would you like to add another author?[y/n]', new CallbackValidator(function (string $value) {
+                more: $factory->textPrompt('Would you like to add another author?' . $option, new CallbackValidator(function (string $value) {
                     if (! in_array($value, ['y', 'Y', 'n', 'N'], true)) {
                         $message = sprintf('Answer "%s" or "%s"', 'y', 'n');
 
@@ -135,11 +128,27 @@ final class InitStage implements Stage
 
     public function run(): void
     {
-        $this->title->render();
-        $this->introduction->render();
+        $this
+            ->factory
+            ->block('Themosis Package')
+            ->render();
+
+        $this
+            ->factory
+            ->paragraph('The Themosis Package tool will guide you to setup your PHP package or application.')
+            ->addText('The following steps will help you configure your "composer.json" file:')
+            ->render();
+
+        $this->title('Vendor');
         $this->vendor->render();
+
+        $this->title('Package');
         $this->package->render();
+
+        $this->title('Description');
         $this->description->render();
+
+        $this->title('Authors');
         $this->authors->render();
     }
 
@@ -160,5 +169,17 @@ final class InitStage implements Stage
         if ($component === $this->authors && $component instanceof MultiPrompt) {
             $this->state['authors'] = $component->value();
         }
+    }
+
+    private function title(string $text): void
+    {
+        $this
+            ->factory
+            ->title(
+                $text,
+                Display::bold(),
+                ForegroundColor::green(),
+            )
+            ->render();
     }
 }
