@@ -13,7 +13,7 @@ use Themosis\Cli\Message;
 use Themosis\Cli\Output;
 use Themosis\Cli\Sequence;
 use Themosis\Cli\Text;
-use Themosis\Components\Package\Configurator\Split;
+use Themosis\Cli\TextProcessing\Split;
 
 final class Paragraph extends Component
 {
@@ -29,7 +29,7 @@ final class Paragraph extends Component
         $this->sequence = Sequence::make()
             ->attributes(...$attributes)
             ->append(
-                ...$this->generateText($text),
+                ...$this->applyText($text),
             )
             ->append(
                 Sequence::make()
@@ -45,11 +45,11 @@ final class Paragraph extends Component
     /**
      * @return Code[]
      */
-    private function generateText(string $text): array
+    private function applyText(string $text): array
     {
-        $lines = (new Split())
-            ->split($text)
-            ->get();
+        $lines = (new Split(
+            length: $this->length,
+        ))($text);
 
         $textElements = array_reduce($lines, function (array $carry, string $text) {
             $carry[] = new LineFeed();
@@ -68,7 +68,7 @@ final class Paragraph extends Component
         $this
             ->sequence
             ->append(
-                ...$this->generateText($text),
+                ...$this->applyText($text),
             );
 
         return $this;

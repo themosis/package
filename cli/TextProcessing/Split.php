@@ -2,22 +2,26 @@
 
 declare(strict_types=1);
 
-namespace Themosis\Components\Package\Configurator;
+namespace Themosis\Cli\TextProcessing;
 
 final class Split
 {
     private array $lines = [];
 
-    public const WHITESPACE = ' ';
+    private const WHITESPACE = ' ';
 
     public function __construct(
         private int $length = 60,
     ) {}
 
-    public function split(string $text): static
+    private function reset(): void
+    {
+        $this->lines = [];
+    }
+
+    private function split(string $text): void
     {
         $line = [];
-
         $pointer = 0;
 
         while ($pointer < strlen($text)) {
@@ -35,12 +39,13 @@ final class Split
         }
 
         $this->lines[] = $line;
-
-        return $this;
     }
 
-    public function get(): array
+    public function __invoke(string $text): array
     {
+        $this->reset();
+        $this->split($text);
+        
         return array_reverse(array_map(function (array $line) {
             return  trim(implode('', $line));
         }, $this->lines));
