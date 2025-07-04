@@ -130,13 +130,22 @@ final class InitStage implements Stage
     {
         $this
             ->factory
-            ->block('Themosis Package')
+            ->block('Themosis Configurator')
             ->render();
 
         $this
             ->factory
-            ->paragraph('The Themosis Package tool will guide you to setup your PHP package or application.')
-            ->addText('The following steps will help you configure your "composer.json" file:')
+            ->paragraph('The Themosis Configurator script will guide you to setup your PHP package or application using a set of standard tools.')
+            ->addText('The package provides tools and configuration out of the box to help you quickly start a new project using PHP.')
+            ->addText('Default tools installed are:')
+            ->render();
+
+        $this
+            ->factory
+            ->list(ForegroundColor::magenta())
+            ->addTextElement('PHPUnit')
+            ->addTextElement('PHPStan')
+            ->addTextElement('PHPCS')
             ->render();
 
         $this->title('Vendor');
@@ -150,6 +159,16 @@ final class InitStage implements Stage
 
         $this->title('Authors');
         $this->authors->render();
+
+        $checkmark = Sequence::make()
+            ->append(
+                new Text("\u{2713}")
+            );
+
+        $this
+            ->factory
+            ->paragraph('[' . $checkmark->get() . '] Configuration completed!', ForegroundColor::green())
+            ->render();
     }
 
     public function componentChanged(Component &$component): void

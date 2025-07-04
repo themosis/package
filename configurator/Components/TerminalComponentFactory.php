@@ -52,6 +52,14 @@ final class TerminalComponentFactory implements ComponentFactory
         );
     }
 
+    public function list(Attribute ...$attributes): TextList
+    {
+        return new TextList(
+            $this->output,
+            ...$attributes,
+        );
+    }
+
     public function textPrompt(string $message, Validator $validator): TextPrompt
     {
         return new TextPrompt(

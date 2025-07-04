@@ -15,6 +15,8 @@ interface ComponentFactory
     public function title(string $text, Attribute ...$attributes): Title;
     
     public function paragraph(string $text, Attribute ...$attributes): Paragraph;
+
+    public function list(Attribute ...$attributes): TextList;
     
     public function textPrompt(string $message, Validator $validator): TextPrompt;
 
